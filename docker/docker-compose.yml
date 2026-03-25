@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+
+  # ─── Base de datos ─────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: treborlabs_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: trebor
+      POSTGRES_PASSWORD: trebor_secret
+      POSTGRES_DB: treborlabs
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trebor -d treborlabs"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ─── Backend (Fastify + Prisma) ────────────────────────────────────────────
+  backend:
+    build:
+      context: ../apps/backend
+      dockerfile: Dockerfile
+    container_name: treborlabs_backend
+    restart: unless-stopped
+    env_file:
+      - ../apps/backend/.env
+    environment:
+      # Sobreescribir solo lo que cambia dentro de Docker
+      DATABASE_URL: postgresql://trebor:trebor_secret@postgres:5432/treborlabs
+      PORT: 3001
+      BACKEND_URL: http://localhost:3001
+      FRONTEND_URL: http://localhost:5173
+    volumes:
+      # Hot reload: solo el código fuente
+      - ../apps/backend/src:/app/src
+      - ../apps/backend/prisma:/app/prisma
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ─── Frontend (Vite dev server) ────────────────────────────────────────────
+  frontend:
+    build:
+      context: ../apps/frontend
+      dockerfile: Dockerfile
+    container_name: treborlabs_frontend
+    restart: unless-stopped
+    env_file:
+      - ../apps/frontend/.env
+    environment:
+      # En Docker, las peticiones van por el proxy de Vite → backend container
+      # No necesita IP del homeserver
+      VITE_API_URL: ""
+    volumes:
+      # Hot reload: código fuente y assets
+      - ../apps/frontend/src:/app/src
+      - ../apps/frontend/public:/app/public
+      - ../apps/frontend/index.html:/app/index.html
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

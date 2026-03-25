@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens as CSS variables (needed for animations/filters) */
+:root {
+  --color-primary: #d6baff;
+  --color-primary-container: #6b4c9a;
+  --color-surface: #131315;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #131315; }
+::-webkit-scrollbar-thumb { background: #2a2a2c; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #6b4c9a; }
+
+/* No-scrollbar utility */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* === Logo silhouette ring tracer === */
+
+@property --logo-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes logoRingTrace {
+  from { --logo-angle: 0deg; }
+  to   { --logo-angle: 360deg; }
+}
+
+/* Faint static ring always visible */
+.logo-ring-base {
+  position: absolute;
+  inset: -2px;
+  background: transparent;
+  -webkit-mask:
+    url('/logo.png') center / 100% auto no-repeat,
+    url('/logo.png') center / calc(100% - 5px) auto no-repeat;
+  -webkit-mask-composite: xor;
+  mask:
+    url('/logo.png') center / 100% auto no-repeat,
+    url('/logo.png') center / calc(100% - 5px) auto no-repeat;
+  mask-composite: exclude;
+  box-shadow: inset 0 0 0 1px rgba(107, 76, 154, 0.4);
+  pointer-events: none;
+}
+
+/* The spinning bright arc — follows exact logo silhouette */
+.logo-tracer-ring {
+  position: absolute;
+  inset: -2px;
+  background: conic-gradient(
+    from var(--logo-angle),
+    transparent 0deg,
+    rgba(214, 186, 255, 0.15) 20deg,
+    rgba(214, 186, 255, 0.5) 80deg,
+    var(--color-primary) 160deg,
+    rgba(214, 186, 255, 0.5) 270deg,
+    rgba(214, 186, 255, 0.15) 330deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    url('/logo.png') center / 100% auto no-repeat,
+    url('/logo.png') center / calc(100% - 5px) auto no-repeat;
+  -webkit-mask-composite: xor;
+  mask:
+    url('/logo.png') center / 100% auto no-repeat,
+    url('/logo.png') center / calc(100% - 5px) auto no-repeat;
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 4px var(--color-primary));
+  animation: logoRingTrace 5s linear infinite;
+  pointer-events: none;
+}
+
+
