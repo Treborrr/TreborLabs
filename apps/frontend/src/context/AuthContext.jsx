@@ -61,18 +61,18 @@ export const AuthProvider = ({ children }) => {
   // Helper para hacer fetch autenticado desde cualquier parte
   const authFetch = (url, options = {}) => {
     const token = localStorage.getItem('trebor_token');
-    return fetch(url, {
-      ...options,
-      headers: {
-        ...options.headers,
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        'Content-Type': 'application/json',
-      },
-    });
+    const isFormData = options.body instanceof FormData;
+    const headers = {
+      ...options.headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      // No forzar Content-Type en FormData — el browser lo setea con el boundary
+      ...(!isFormData && !options.headers?.['Content-Type'] ? { 'Content-Type': 'application/json' } : {}),
+    };
+    return fetch(url, { ...options, headers });
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithToken, logout, authFetch }}>
+    <AuthContext.Provider value={{ user, loading, loginWithToken, logout, authFetch, API }}>
       {children}
     </AuthContext.Provider>
   );

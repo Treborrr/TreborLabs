@@ -7,17 +7,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  avatar        String?
+  role          Role      @default(USER)
+  password      String?           // null para usuarios OAuth-only
+  emailVerified Boolean   @default(false)
+  suspended     Boolean   @default(false)
+  lastSeenAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   accounts Account[]
   sessions Session[]
   orders   Order[]
+  posts    Post[]
+}
+
+model MagicToken {
+  id        String    @id @default(cuid())
+  token     String    @unique @default(cuid())
+  email     String
+  userId    String?
+  type      String    // "verify_email" | "reset_password" | "change_password"
+  payload   String?   // Para change_password: hash de la nueva contraseña
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
 }
 
 // Vincula un usuario con su cuenta de Google o GitHub
@@ -55,4 +78,36 @@ model Order {
   updatedAt DateTime @updatedAt
 
   user User? @relation(fields: [userId], references: [id])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  price       Float
+  category    String   // "keyboard" | "raspi"
+  status      String   @default("in_stock") // "in_stock" | "coming_soon" | "out_of_stock"
+  images      Json     @default("[]")   // String[] — rutas relativas /uploads/...
+  specs       Json     @default("{}")   // specs por categoría
+  featured    Boolean  @default(false)
+  stock       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Post {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  content     String    // Markdown
+  excerpt     String?
+  coverImage  String?
+  category    String?
+  status      String    @default("draft") // "draft" | "published"
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }

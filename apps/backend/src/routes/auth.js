@@ -20,12 +20,13 @@ async function findOrCreateUser(prisma, { provider, providerAccountId, email, na
     return existingUser;
   }
 
-  // 3. Crear usuario nuevo
+  // 3. Crear usuario nuevo (OAuth → emailVerified: true automáticamente)
   return prisma.user.create({
     data: {
       email,
       name,
       avatar,
+      emailVerified: true,
       accounts: { create: { provider, providerAccountId } },
     },
   });

@@ -38,6 +38,7 @@ services:
       # Hot reload: solo el código fuente
       - ../apps/backend/src:/app/src
       - ../apps/backend/prisma:/app/prisma
+      - ../apps/backend/uploads:/app/uploads
     ports:
       - "3001:3001"
     depends_on:

@@ -1,12 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-
-const sidebarLinks = [
-  { path: '/admin', label: 'Products', icon: 'inventory_2' },
-  { path: '/admin/orders', label: 'Orders', icon: 'shopping_bag' },
-  { path: '/admin/blog', label: 'Blog', icon: 'article' },
-  { path: '/admin-settings', label: 'Settings', icon: 'settings' },
-];
+import AdminSidebar from '../components/AdminSidebar';
 
 const allOrders = [
   { id: '#TL-2941', customer: 'Alex M.', email: 'alex@mail.com', product: 'Split v1 Keyboard', amount: '$349.00', date: '25 Mar 2026', status: 'Shipped' },
@@ -30,7 +23,6 @@ const statusStyles = {
 const tabs = ['Todos', 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
 const AdminOrders = () => {
-  const location = useLocation();
   const [activeTab, setActiveTab] = useState('Todos');
   const [search, setSearch] = useState('');
 
@@ -49,43 +41,7 @@ const AdminOrders = () => {
 
   return (
     <div className="flex bg-surface min-h-screen text-on-surface">
-      {/* Sidebar */}
-      <aside className="h-screen w-64 fixed left-0 top-0 bg-[#131315] flex flex-col border-r border-primary/15 z-50">
-        <div className="p-8">
-          <h1 className="text-primary font-bold text-lg font-headline tracking-tight">Trebor Admin</h1>
-          <p className="font-mono text-[10px] tracking-widest text-on-surface-variant/60 uppercase mt-1">Technical Tactician</p>
-        </div>
-        <nav className="flex-1 mt-4">
-          {sidebarLinks.map((link) => {
-            const isActive = location.pathname === link.path;
-            return (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`flex items-center gap-3 px-6 py-4 transition-all no-underline ${
-                  isActive
-                    ? 'bg-primary-container/20 text-primary border-r-4 border-primary'
-                    : 'text-gray-500 hover:bg-surface-container-high hover:text-white'
-                }`}
-              >
-                <span className="material-symbols-outlined">{link.icon}</span>
-                <span className="font-mono text-xs tracking-widest">{link.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="p-6 mt-auto">
-          <div className="flex items-center gap-3 mb-6 px-2">
-            <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-on-surface">Trebor Labs</p>
-              <p className="text-[10px] text-on-surface-variant">System Lead</p>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <AdminSidebar />
 
       {/* Content */}
       <main className="ml-64 min-h-screen bg-surface-container-low flex flex-col w-full">
