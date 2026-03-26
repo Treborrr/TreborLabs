@@ -58,6 +58,7 @@ const Navbar = () => {
       ]
     },
     { path: '/blog', label: 'Blog' },
+    { path: '/about', label: 'Nosotros' },
     { path: '/contact', label: 'Contacto' },
   ];
 
