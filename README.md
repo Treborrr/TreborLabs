@@ -97,22 +97,52 @@ Técnica: CSS `mask-composite: exclude` + `@property --logo-angle` (Houdini). Ve
 
 ## Levantar con Docker
 
+### Requisitos
+
+- Docker + Docker Compose
+- Git
+
+### Primera vez en cualquier máquina
+
 ```bash
-# 1. Variables de entorno
+# 1. Clonar el repo
+git clone <url-del-repo> TreborLabs
+cd TreborLabs
+
+# 2. Variables de entorno
 cp apps/backend/.env.example  apps/backend/.env
 cp apps/frontend/.env.example apps/frontend/.env
 # Editar apps/backend/.env con tus credenciales reales
 
-# 2. Construir y levantar
-cd docker
-docker compose up --build
-
-# Frontend → http://localhost:5173
-# Backend  → http://localhost:3001
-# Admin    → http://localhost:5173/admin
+# 3. Levantar
+./deploy.sh
 ```
 
-El backend corre `prisma db push` automáticamente y crea las tablas + datos iniciales (zonas de envío, categorías, usuario admin).
+`deploy.sh` construye las imágenes, levanta los contenedores y espera a que el backend esté listo antes de terminar.
+
+```
+Frontend → http://localhost:5173
+Backend  → http://localhost:3001
+Admin    → http://localhost:5173/admin
+```
+
+### Comandos del día a día
+
+```bash
+./deploy.sh          # Levantar (o rebuildar tras cambios de config)
+./stop.sh            # Apagar
+cd docker && docker compose up -d   # Encender sin rebuildar
+```
+
+### Arranque automático al encender la máquina
+
+Con `restart: unless-stopped` en el compose, los contenedores vuelven solos si el sistema se reinicia. Para activarlo:
+
+```bash
+sudo systemctl enable docker
+```
+
+A partir de ahí: enciendes el PC → Docker arranca → el proyecto está corriendo. Si lo apagaste con `./stop.sh`, no vuelve solo hasta que corras `./deploy.sh` o `docker compose up -d` manualmente.
 
 ### Hot reload
 
@@ -120,7 +150,30 @@ El backend corre `prisma db push` automáticamente y crea las tablas + datos ini
 |---|---|
 | Backend | `node --watch src/index.js` — cambios en `src/` visibles de inmediato |
 | Frontend | Vite HMR — `src/`, `public/`, `index.html` montados como volumen |
-| Config | `vite.config.js`, `package.json` requieren `docker compose up --build` |
+| Config | `vite.config.js`, `package.json` requieren `./deploy.sh` para rebuildar |
+
+### Acceso desde otros dispositivos en la red local
+
+Los puertos 5173 y 3001 ya escuchan en todas las interfaces (`0.0.0.0`). El único paso necesario es abrir esos puertos en el firewall de la máquina donde corre Docker — esto es una configuración del sistema operativo, no del proyecto, y hay que hacerlo una sola vez por máquina:
+
+```bash
+sudo ufw allow 5173
+sudo ufw allow 3001
+```
+
+Luego cualquier dispositivo en la misma red puede entrar con la IP local del servidor:
+
+```bash
+# Obtener la IP local de esta máquina
+hostname -I | awk '{print $1}'
+# Ejemplo: 192.168.1.100
+
+# Desde otros dispositivos:
+# http://192.168.1.100:5173  → Frontend
+# http://192.168.1.100:3001  → Backend
+```
+
+> **OAuth en red local:** Google y GitHub requieren redirect URIs registrados. Si necesitas probar OAuth desde otros dispositivos, agrega `http://TU_IP:3001/auth/google/callback` y `http://TU_IP:3001/auth/github/callback` en las consolas de Google y GitHub respectivamente. Login con email/password funciona sin ningún cambio adicional.
 
 ---
 
