@@ -1,16 +1,21 @@
 import { Link } from 'react-router-dom';
+import useSiteConfig from '../hooks/useSiteConfig';
 
-const Footer = () => (
+const Footer = () => {
+  const { config } = useSiteConfig();
+  const tagline = config?.footer?.tagline ?? "Teclados custom & Raspberry Pi para makers y enthusiasts.";
+
+  return (
   <footer className="bg-[#0e0e10] border-t border-outline-variant/10 mt-20 py-12 px-8">
     <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
       {/* Brand */}
       <div className="md:col-span-1">
         <Link to="/" className="flex items-center gap-2 no-underline mb-3">
-          <img src="/logo.png" alt="Trebor Labs" className="w-7 h-7 object-contain" />
-          <span className="font-headline font-black text-primary tracking-tighter">Trebor Labs</span>
+          <img src="/logo.png" alt="Trebor Labs" className="w-10 h-10 object-contain" />
+          <span className="font-headline font-black text-primary tracking-tighter text-xl">Trebor Labs</span>
         </Link>
         <p className="text-xs text-on-surface-variant font-mono leading-relaxed">
-          Teclados custom & Raspberry Pi para makers y enthusiasts.
+          {tagline}
         </p>
       </div>
 
@@ -77,6 +82,7 @@ const Footer = () => (
       <p className="text-[11px] text-on-surface-variant/40 font-mono">Lima, Perú 🇵🇪</p>
     </div>
   </footer>
-);
+  );
+};
 
 export default Footer;

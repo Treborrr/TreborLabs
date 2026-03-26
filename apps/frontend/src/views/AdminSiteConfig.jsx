@@ -256,6 +256,14 @@ const AdminSiteConfig = () => {
               </div>
             </div>
           </section>
+          {/* Footer Section */}
+          <section className="bg-surface p-8 rounded-xl shadow-2xl animate-fade-in">
+            <h2 className="text-lg font-bold mb-6 font-headline text-primary border-b border-outline-variant/20 pb-2">Sección: Footer</h2>
+            <div>
+              <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Descripción / Tagline</label>
+              <textarea value={formData.footer?.tagline || ''} onChange={(e) => handleChange('footer', 'tagline', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" rows={2} />
+            </div>
+          </section>
         </div>
       </main>
 

@@ -23,6 +23,9 @@ const defaultSiteConfig = {
     cta: "Nuestra Historia",
     ctaLink: "/about",
     images: []
+  },
+  footer: {
+    tagline: "Teclados custom & Raspberry Pi para makers y enthusiasts."
   }
 };
 
