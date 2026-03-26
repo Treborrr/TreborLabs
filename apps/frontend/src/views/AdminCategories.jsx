@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 const AdminCategories = () => {
+  const { authFetch, API } = useAuth();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -12,8 +13,9 @@ const AdminCategories = () => {
   const loadCategories = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/admin/categories');
-      setCategories(res.data);
+      const res = await authFetch(`${API}/admin/categories`);
+      const data = await res.json();
+      setCategories(data);
     } catch (err) {
       console.error(err);
       setMsg({ type: 'error', text: 'Error cargando categorías' });
@@ -32,7 +34,10 @@ const AdminCategories = () => {
     setMsg({ type: '', text: '' });
     try {
       const orderParsed = parseInt(newCat.order, 10) || 0;
-      await api.post('/admin/categories', { ...newCat, order: orderParsed });
+      await authFetch(`${API}/admin/categories`, {
+        method: 'POST',
+        body: JSON.stringify({ ...newCat, order: orderParsed }),
+      });
       setMsg({ type: 'success', text: 'Categoría creada' });
       setShowAdd(false);
       setNewCat({ name: '', slug: '', icon: '', order: 0, enabled: true });
@@ -47,7 +52,10 @@ const AdminCategories = () => {
 
   const handleToggle = async (id, currentEnabled) => {
     try {
-      await api.patch(`/admin/categories/${id}`, { enabled: !currentEnabled });
+      await authFetch(`${API}/admin/categories/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ enabled: !currentEnabled }),
+      });
       setCategories(categories.map(c => c.id === id ? { ...c, enabled: !currentEnabled } : c));
     } catch (err) {
       console.error(err);
@@ -58,7 +66,9 @@ const AdminCategories = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar esta categoría? Si tiene productos, fallará.")) return;
     try {
-      await api.delete(`/admin/categories/${id}`);
+      await authFetch(`${API}/admin/categories/${id}`, {
+        method: 'DELETE',
+      });
       setMsg({ type: 'success', text: 'Categoría eliminada' });
       loadCategories();
     } catch (err) {

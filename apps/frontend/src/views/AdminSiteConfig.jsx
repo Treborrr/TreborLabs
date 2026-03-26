@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import useSiteConfig from '../hooks/useSiteConfig';
-import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 const AdminSiteConfig = () => {
+  const { authFetch, API } = useAuth();
   const { config, loading } = useSiteConfig();
   const [formData, setFormData] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -55,10 +56,12 @@ const AdminSiteConfig = () => {
     data.append('file', file);
 
     try {
-      const res = await api.post('/admin/upload', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const res = await authFetch(`${API}/admin/upload`, {
+        method: 'POST',
+        body: data,
       });
-      const url = res.data.url;
+      const d = await res.json();
+      const url = d.url;
 
       if (index !== null) {
         // array of images (like about.images)
@@ -80,7 +83,10 @@ const AdminSiteConfig = () => {
     setSaving(true);
     setMsg({ type: '', text: '' });
     try {
-      await api.put('/admin/site-config', formData);
+      await authFetch(`${API}/admin/site-config`, {
+        method: 'PUT',
+        body: JSON.stringify(formData),
+      });
       setMsg({ type: 'success', text: 'Configuración guardada correctamente.' });
       // Clear user frontend cache so they see it instantly if they go to home
       sessionStorage.removeItem('trebor_site_config');
