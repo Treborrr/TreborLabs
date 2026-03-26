@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import SEOMeta from '../components/SEOMeta';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -54,7 +55,9 @@ const Blog = () => {
 
   return (
     <main className="pt-32 pb-20 px-6 md:px-12 max-w-[1400px] mx-auto">
+      <SEOMeta title="Blog — Hardware Insights" description="Artículos técnicos, reviews y guías sobre teclados mecánicos, Raspberry Pi y hardware editorial." />
       {/* Header */}
+
       <header className="mb-16">
         <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tighter mb-4 text-on-surface">
           Hardware <span className="text-primary">Insights</span>

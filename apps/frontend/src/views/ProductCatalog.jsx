@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import { imgUrl } from '../utils/imgUrl';
+import SEOMeta from '../components/SEOMeta';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -20,23 +21,46 @@ const ProductCatalog = () => {
   const { user } = useAuth();
   const { ids: wishlistIds, toggle: toggleWishlist } = useWishlist();
   const location = useLocation();
-  const isRaspi       = location.pathname.includes('raspi');
-  const currentCategory = isRaspi ? 'raspi' : 'keyboard';
-
+  
+  const queryParams = new URLSearchParams(location.search);
+  const qCategory = queryParams.get('category');
+  
+  // Si la ruta es /raspi, forzamos categoría raspi por defecto
+  const initCategory = location.pathname.includes('/raspi') ? 'raspi' : (qCategory || '');
+  
+  const [currentCategory, setCurrentCategory] = useState(initCategory);
+  const [categories, setCategories] = useState([]);
   const [products, setProducts]   = useState([]);
   const [loading, setLoading]     = useState(true);
   const [searchQuery, setSearch]  = useState('');
   const [raspiModel, setModel]    = useState('Todos');
 
+  // Actualizar categoría si cambian los params o la ruta
+  useEffect(() => {
+    const newCat = location.pathname.includes('/raspi') ? 'raspi' : (new URLSearchParams(location.search).get('category') || '');
+    setCurrentCategory(newCat);
+  }, [location.search, location.pathname]);
+
+  useEffect(() => {
+    fetch(`${API}/api/categories`)
+      .then(r => r.json())
+      .then(data => setCategories(data || []))
+      .catch(console.error);
+  }, []);
+
   useEffect(() => {
     setLoading(true);
     setProducts([]);
-    fetch(`${API}/api/products?category=${currentCategory}&limit=50`)
+    const url = currentCategory ? `${API}/api/products?category=${currentCategory}&limit=50` : `${API}/api/products?limit=50`;
+    fetch(url)
       .then(r => r.json())
       .then(data => setProducts(data.products || []))
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [currentCategory]);
+
+  const isRaspi = currentCategory === 'raspi';
+  const isKeyboard = currentCategory === 'keyboard';
 
   const filteredProducts = useMemo(() => {
     let list = products;
@@ -54,14 +78,18 @@ const ProductCatalog = () => {
 
   return (
     <main className="pt-32 pb-20 px-8 max-w-[1600px] mx-auto min-h-screen">
+      <SEOMeta
+        title={isRaspi ? 'Raspberry Pi & SBCs' : isKeyboard ? 'Teclados Custom' : 'Catálogo'}
+        description={isRaspi ? 'Kits Raspberry Pi, single board computers y accesorios IoT.' : 'Teclados mecánicos custom, kits y periféricos de alta calidad.'}
+      />
       {/* Header */}
       <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="space-y-2">
           <p className="font-mono text-primary text-xs tracking-widest uppercase">
-            {isRaspi ? 'Single Board Computers' : 'Directorio Técnico'}
+            {isRaspi ? 'Single Board Computers' : isKeyboard ? 'Directorio Técnico' : 'Catálogo General'}
           </p>
           <h1 className="font-headline text-5xl font-black tracking-tighter uppercase italic">
-            {isRaspi ? 'Raspberry Pi & SBCs' : 'Teclados Custom'}
+            {isRaspi ? 'Raspberry Pi & SBCs' : isKeyboard ? 'Teclados Custom' : 'Todos los Productos'}
           </h1>
         </div>
         <div className="w-full max-w-xl">
@@ -69,7 +97,7 @@ const ProductCatalog = () => {
             <span className="material-symbols-outlined absolute left-4 text-on-surface-variant">search</span>
             <input
               className="w-full bg-transparent border-none py-4 pl-12 pr-6 text-on-surface focus:ring-0 placeholder:text-on-surface-variant/50"
-              placeholder={isRaspi ? 'Buscar kits y SBCs...' : 'Buscar periféricos...'}
+              placeholder={'Buscar periféricos o hardware...'}
               type="text"
               value={searchQuery}
               onChange={e => setSearch(e.target.value)}
@@ -90,24 +118,29 @@ const ProductCatalog = () => {
               Filtros Avanzados
             </h3>
 
-            {/* Category toggle */}
+            {/* Category toggle dinámico */}
             <div className="space-y-2">
               <p className="font-mono text-[10px] uppercase text-on-surface-variant tracking-widest">Categoría</p>
-              {[
-                { id: 'keyboard', label: 'Teclados Custom', link: '/products' },
-                { id: 'raspi',    label: 'Raspberry Pi',   link: '/raspi' },
-              ].map(cat => (
-                <Link to={cat.link} key={cat.id} className="flex items-center gap-3 cursor-pointer group no-underline">
-                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${currentCategory === cat.id ? 'bg-primary border-primary text-surface' : 'bg-surface-container-highest border-outline-variant/30 group-hover:border-primary/50'}`}>
-                    {currentCategory === cat.id && <span className="material-symbols-outlined text-[12px] font-bold">check</span>}
+              
+              <Link to="/products" className="flex items-center gap-3 cursor-pointer group no-underline">
+                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${currentCategory === '' ? 'bg-primary border-primary text-surface' : 'bg-surface-container-highest border-outline-variant/30 group-hover:border-primary/50'}`}>
+                  {currentCategory === '' && <span className="material-symbols-outlined text-[12px] font-bold">check</span>}
+                </div>
+                <span className={`text-sm group-hover:text-primary transition-colors ${currentCategory === '' ? 'text-primary font-medium' : 'text-on-surface'}`}>Todos</span>
+              </Link>
+              
+              {categories.map(cat => (
+                <Link to={`/products?category=${cat.slug}`} key={cat.id} className="flex items-center gap-3 cursor-pointer group no-underline">
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${currentCategory === cat.slug ? 'bg-primary border-primary text-surface' : 'bg-surface-container-highest border-outline-variant/30 group-hover:border-primary/50'}`}>
+                    {currentCategory === cat.slug && <span className="material-symbols-outlined text-[12px] font-bold">check</span>}
                   </div>
-                  <span className={`text-sm group-hover:text-primary transition-colors ${currentCategory === cat.id ? 'text-primary font-medium' : 'text-on-surface'}`}>{cat.label}</span>
+                  <span className={`text-sm group-hover:text-primary transition-colors ${currentCategory === cat.slug ? 'text-primary font-medium' : 'text-on-surface'}`}>{cat.name}</span>
                 </Link>
               ))}
             </div>
 
-            {/* Keyboard filters */}
-            {!isRaspi && (
+            {/* Keyboard filters (legacy) */}
+            {isKeyboard && (
               <>
                 <div className="space-y-2">
                   <p className="font-mono text-[10px] uppercase text-on-surface-variant tracking-widest">Configuración</p>
@@ -129,7 +162,7 @@ const ProductCatalog = () => {
               </>
             )}
 
-            {/* Raspi filters */}
+            {/* Raspi filters (legacy) */}
             {isRaspi && (
               <>
                 <div className="space-y-2">
@@ -180,12 +213,12 @@ const ProductCatalog = () => {
           <div className="bg-gradient-to-br from-primary/20 to-primary-container/40 p-6 rounded-2xl relative overflow-hidden group">
             <div className="relative z-10 space-y-3">
               <h4 className="font-headline font-bold italic leading-tight uppercase">
-                {isRaspi ? 'Pi Dev Program' : 'Custom Labs Program'}
+                {isRaspi ? 'Pi Dev Program' : isKeyboard ? 'Custom Labs Program' : 'Trebor Pro'}
               </h4>
               <p className="text-xs text-on-surface-variant">
                 {isRaspi
                   ? 'Accede a documentación avanzada, descuentos y soporte prioritario.'
-                  : 'Diseña tu PCB desde cero con nuestra guía experta.'}
+                  : 'Diseña tu PCB o accede a early access de productos.'}
               </p>
               <button className="text-xs font-bold text-primary flex items-center gap-2 group-hover:gap-3 transition-all uppercase tracking-tighter">
                 {isRaspi ? 'Registrarme' : 'Explorar Programa'}
@@ -235,7 +268,7 @@ const ProductCatalog = () => {
                           title={wishlistIds.has(p.id) ? 'Quitar de wishlist' : 'Agregar a wishlist'}
                         >
                           <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: wishlistIds.has(p.id) ? "'FILL' 1" : "'FILL' 0", color: wishlistIds.has(p.id) ? '#ef4444' : undefined }}>
-                            favorite
+                             favorite
                           </span>
                         </button>
                       )}
@@ -285,7 +318,7 @@ const ProductCatalog = () => {
               )}
 
               {/* Custom Build CTA */}
-              {!isRaspi && (
+              {(isKeyboard || currentCategory === '') && (
                 <div className="group flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/30 rounded-xl aspect-[4/5] text-center p-8">
                   <span className="material-symbols-outlined text-4xl text-outline-variant mb-4">settings_input_component</span>
                   <h3 className="font-headline font-bold uppercase tracking-tight mb-2">Build Custom</h3>

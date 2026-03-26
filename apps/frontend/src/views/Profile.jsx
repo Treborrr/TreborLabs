@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import SEOMeta from '../components/SEOMeta';
 
 const Profile = () => {
   const { user, loading, logout, authFetch, API } = useAuth();
@@ -174,7 +175,9 @@ const Profile = () => {
 
   return (
     <main className="pt-32 pb-20 px-6 md:px-12 max-w-6xl mx-auto min-h-screen">
+      <SEOMeta title="Mi Perfil" description="Gestiona tu perfil, pedidos, direcciones y seguridad en Trebor Labs." />
       {msgParam && successMessages[msgParam] && (
+
         <div className="mb-8 bg-green-500/10 border border-green-500/30 rounded-xl px-5 py-4 flex items-center gap-3">
           <span className="material-symbols-outlined text-green-400">check_circle</span>
           <p className="text-sm text-green-400">{successMessages[msgParam]}</p>

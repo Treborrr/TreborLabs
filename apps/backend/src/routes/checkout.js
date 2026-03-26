@@ -1,5 +1,6 @@
 import MercadoPagoConfig, { Preference } from 'mercadopago';
-import { sendOrderConfirmationEmail } from '../services/email.js';
+import { sendOrderConfirmationEmail, sendAdminNewOrderEmail } from '../services/email.js';
+
 
 function getMPClient() {
   const token = process.env.MP_ACCESS_TOKEN;
@@ -220,6 +221,10 @@ export default async function checkoutRoutes(fastify) {
     const emailTarget = request.currentUser?.email ?? shippingAddress.email;
     if (emailTarget) {
       sendOrderConfirmationEmail(emailTarget, order, shippingAddress).catch(() => {});
+    }
+    // A6.3 — Notificar al admin de nuevo pedido
+    if (process.env.ADMIN_EMAIL) {
+      sendAdminNewOrderEmail(process.env.ADMIN_EMAIL, order, shippingAddress).catch(() => {});
     }
 
     return reply.code(201).send({

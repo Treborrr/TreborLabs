@@ -12,7 +12,12 @@ export default async function productsRoutes(fastify) {
   fastify.get('/api/products', async (request) => {
     const { category, status, search, featured, limit = '50', offset = '0' } = request.query;
     const where = {};
-    if (category) where.category = category;
+    // A7.1: Si se filtra por category, verificar que existe; si no existe, retornar []
+    if (category) {
+      const categoryExists = await fastify.prisma.category.findUnique({ where: { slug: category } });
+      if (!categoryExists) return { products: [], total: 0 };
+      where.category = category;
+    }
     if (status) where.status = status;
     if (featured !== undefined) where.featured = featured === 'true';
     if (search) {
@@ -21,13 +26,17 @@ export default async function productsRoutes(fastify) {
         { description: { contains: search, mode: 'insensitive' } },
       ];
     }
+    // A7.3 Limit max 100
+    const take = Math.min(parseInt(limit) || 50, 100);
+    const skip = parseInt(offset) || 0;
 
     const [rawProducts, total] = await fastify.prisma.$transaction([
       fastify.prisma.product.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        take: parseInt(limit),
-        skip: parseInt(offset),
+        take,
+        skip,
+
         include: {
           variants: { orderBy: { name: 'asc' } },
           reviews:  { select: { rating: true } },

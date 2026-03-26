@@ -1,60 +1,99 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SEOMeta from '../components/SEOMeta';
 
-const About = () => (
-  <main className="pt-32 pb-20 px-6 max-w-4xl mx-auto min-h-screen">
-    <SEOMeta title="Sobre Nosotros" description="Trebor Labs — hardware técnico editorial para entusiastas de teclados mecánicos y Raspberry Pi." />
+const About = () => {
+  return (
+    <main className="bg-surface text-on-surface min-h-screen">
+      <SEOMeta
+        title="Sobre Nosotros — Trebor Labs"
+        description="Conoce la historia y misión de Trebor Labs. Somos un laboratorio de hardware para el artesano digital."
+      />
 
-    <div className="mb-16 space-y-4">
-      <p className="font-mono text-primary text-xs tracking-widest uppercase">Quiénes somos</p>
-      <h1 className="font-headline font-black text-5xl tracking-tighter">Trebor Labs</h1>
-      <p className="text-xl text-on-surface-variant max-w-2xl leading-relaxed">
-        Hardware técnico editorial para entusiastas que exigen lo mejor en periféricos y plataformas de desarrollo.
-      </p>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
-      <div className="space-y-4">
-        <h2 className="font-headline font-bold text-xl">Nuestra Misión</h2>
-        <p className="text-on-surface-variant leading-relaxed">
-          Creemos que el hardware de calidad transforma la experiencia de trabajo y creatividad. Cubramos la brecha entre el entusiasta técnico y el equipo que merece: teclados mecánicos crafteados a mano y kits Raspberry Pi configurados para producción real.
-        </p>
-      </div>
-      <div className="space-y-4">
-        <h2 className="font-headline font-bold text-xl">¿Por qué Trebor Labs?</h2>
-        <p className="text-on-surface-variant leading-relaxed">
-          Cada producto que ofrecemos pasa por nuestro equipo técnico. No vendemos cajas — cubramos kits completos, documentación, soporte y una comunidad de makers que hablan tu idioma.
-        </p>
-      </div>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-      {[
-        { label: 'Productos', value: '50+', desc: 'Teclados y kits en catálogo' },
-        { label: 'Comunidad', value: '2K+', desc: 'Tacticioners activos' },
-        { label: 'Soporte', value: '24/7', desc: 'Respuesta en menos de 12h' },
-      ].map(({ label, value, desc }) => (
-        <div key={label} className="bg-surface-container-low rounded-xl border border-outline-variant/10 p-8 text-center space-y-2">
-          <p className="font-headline font-black text-4xl text-primary">{value}</p>
-          <p className="font-bold text-sm">{label}</p>
-          <p className="text-xs text-on-surface-variant">{desc}</p>
+      {/* Hero */}
+      <section className="relative pt-40 pb-24 px-8 overflow-hidden">
+        <div className="absolute inset-0 z-0 opacity-30">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px]" />
         </div>
-      ))}
-    </div>
+        <div className="relative z-10 max-w-4xl mx-auto text-center">
+          <p className="font-mono text-primary text-xs tracking-widest uppercase mb-4">Trebor Labs · Est. 2024</p>
+          <h1 className="font-headline text-5xl md:text-7xl font-black tracking-tighter mb-8">
+            El laboratorio del <span className="text-primary italic">artesano digital.</span>
+          </h1>
+          <p className="text-on-surface-variant text-xl max-w-2xl mx-auto leading-relaxed">
+            Creemos que las herramientas con las que interactúas cada día deben ser tan precisas como el código que escribes.
+          </p>
+        </div>
+      </section>
 
-    <div className="bg-gradient-to-br from-primary/10 to-primary-container/20 rounded-2xl p-10 text-center space-y-4 border border-primary/20">
-      <h2 className="font-headline font-bold text-2xl">¿Listo para actualizar tu setup?</h2>
-      <p className="text-on-surface-variant">Explora nuestro catálogo de hardware técnico seleccionado.</p>
-      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-        <Link to="/products" className="bg-primary-container text-on-primary-container font-headline font-bold px-6 py-3 rounded-lg text-xs uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all no-underline">
-          Teclados Custom
-        </Link>
-        <Link to="/raspi" className="border border-outline-variant/30 text-on-surface-variant font-headline font-bold px-6 py-3 rounded-lg text-xs uppercase tracking-widest hover:bg-surface-container-high transition-all no-underline">
-          Raspberry Pi
-        </Link>
-      </div>
-    </div>
-  </main>
-);
+      {/* Misión */}
+      <section className="py-20 px-8 bg-surface-container-low">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+          <div>
+            <span className="font-mono text-[10px] text-primary tracking-widest uppercase block mb-4">Nuestra Misión</span>
+            <h2 className="font-headline text-4xl font-bold mb-6">Ingenería como arte, hardware como lenguaje.</h2>
+            <div className="space-y-4 text-on-surface-variant leading-relaxed">
+              <p>Desde Lima, Perú, curamos y diseñamos componentes que cierran la brecha entre la electrónica cruda y la experiencia de usuario refinada. Cada interruptor, cada PCB y cada línea de nuestro blog está pensada para el profesional que no se conforma con lo estándar.</p>
+              <p>No somos solo una tienda de hardware; somos un laboratorio para el creador inconformista. Partimos de la premisa de que el hardware premium no debería estar reservado solo para mercados anglófonos.</p>
+            </div>
+            <Link to="/contact" className="inline-flex items-center gap-3 mt-8 group no-underline">
+              <span className="w-10 h-[1px] bg-primary group-hover:w-16 transition-all"></span>
+              <span className="font-headline font-bold uppercase tracking-widest text-sm text-primary">Contáctanos</span>
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { icon: 'keyboard', label: 'Teclados Custom', desc: 'Diseñados para el tacto perfecto' },
+              { icon: 'memory', label: 'Raspberry Pi', desc: 'SBCs para todo proyecto' },
+              { icon: 'build', label: 'Build Guides', desc: 'Documentación técnica premium' },
+              { icon: 'verified', label: 'Calidad Probada', desc: 'Cada unidad verificada' },
+            ].map(item => (
+              <div key={item.icon} className="bg-surface-container rounded-xl p-6 border border-outline/10 hover:border-primary/30 transition-colors">
+                <span className="material-symbols-outlined text-primary text-3xl block mb-3">{item.icon}</span>
+                <p className="font-bold text-sm text-on-surface mb-1">{item.label}</p>
+                <p className="text-xs text-on-surface-variant">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Valores */}
+      <section className="py-20 px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <p className="font-mono text-[10px] text-primary tracking-widest uppercase mb-4">Por qué existimos</p>
+            <h2 className="font-headline text-4xl font-bold">Nuestros valores fundamentales</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { icon: 'precision_manufacturing', title: 'Precisión', desc: 'No entregamos lo aproximadamente correcto. Cada producto pasa por pruebas de calidad antes de llegar a tus manos.' },
+              { icon: 'groups', title: 'Comunidad', desc: 'Construimos para makers, devs y entusiastas. Nuestro blog y tutoriales son parte del mismo producto.' },
+              { icon: 'local_fire_department', title: 'Pasión', desc: 'Somos usuarios de nuestro propio hardware. Diseñamos aquello que nosotros mismos queremos usar.' },
+            ].map(v => (
+              <div key={v.title} className="bg-surface-container rounded-xl p-8 border border-outline/10">
+                <span className="material-symbols-outlined text-primary text-4xl mb-4 block">{v.icon}</span>
+                <h3 className="font-headline font-bold text-xl mb-3">{v.title}</h3>
+                <p className="text-on-surface-variant text-sm leading-relaxed">{v.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-8 bg-primary-container/10">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="font-headline text-4xl font-bold mb-6">¿Listo para elevar tu setup?</h2>
+          <p className="text-on-surface-variant mb-8">Explora nuestra colección de teclados mecánicos y kits Raspberry Pi.</p>
+          <div className="flex gap-4 justify-center">
+            <Link to="/products" className="px-8 py-4 bg-primary text-on-primary rounded-md font-bold hover:opacity-90 transition-opacity no-underline">Ver Productos</Link>
+            <Link to="/contact" className="px-8 py-4 bg-surface-container text-on-surface rounded-md font-bold border border-outline/20 hover:border-primary/40 transition-colors no-underline">Contactar</Link>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+};
 
 export default About;

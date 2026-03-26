@@ -12,13 +12,15 @@ const sidebarLinks = [
   { path: '/admin/shipping',  label: 'Shipping',   icon: 'local_shipping' },
   // ── Catálogo ──────────────────────────────
   { path: '/admin/products',  label: 'Productos',  icon: 'inventory_2' },
+  { path: '/admin/categories',label: 'Categorías', icon: 'category' },
   // ── Comunidad ─────────────────────────────
   { path: '/admin/blog',      label: 'Blog',       icon: 'article' },
   { path: '/admin/comments',  label: 'Comments',   icon: 'comment' },
   { path: '/admin/users',     label: 'Users',      icon: 'group' },
   // ── Sistema ───────────────────────────────
-  { path: '/admin/logs',      label: 'Logs',       icon: 'history' },
-  { path: '/admin/settings',  label: 'Settings',   icon: 'settings' },
+  { path: '/admin/logs',        label: 'Logs',       icon: 'history' },
+  { path: '/admin/site-config', label: 'CMS Config', icon: 'web' },
+  { path: '/admin/settings',    label: 'Settings',   icon: 'settings' },
 ];
 
 const AdminSidebar = () => {

@@ -184,7 +184,7 @@ export async function sendOrderStatusUpdateEmail(email, order, previousStatus) {
       ${h1(`Actualización de pedido`)}
       <div style="margin:20px 0;padding:14px 16px;background:rgba(214,186,255,0.08);border-radius:6px;">
         <p style="color:#d6baff;font-size:12px;font-family:monospace;margin:0 0 8px;letter-spacing:1px;">PEDIDO #${orderId}</p>
-        <p style="margin:0;font-size:18px;font-weight:900;color:${color};">● ${label}</p>
+        <p style="margin:0;font-size:18px;font-weight:900;color:${color};">&#9679; ${label}</p>
       </div>
       ${order.status === 'shipped' ? p('Tu pedido está en camino. Puedes hacer seguimiento desde tu perfil.') : ''}
       ${order.status === 'delivered' ? p('¡Tu pedido fue entregado! Esperamos que disfrutes tu compra.') : ''}
@@ -194,3 +194,28 @@ export async function sendOrderStatusUpdateEmail(email, order, previousStatus) {
     `),
   });
 }
+
+// A6.3 — Notificación al admin de nuevo pedido
+export async function sendAdminNewOrderEmail(adminEmail, order, shippingAddress) {
+  const orderId = order.id.slice(-8).toUpperCase();
+  const addr = shippingAddress ?? order.shippingAddress ?? {};
+  await send({
+    to: adminEmail,
+    subject: `🛭 Nuevo pedido #${orderId} — Trebor Labs`,
+    html: wrap(`
+      ${h1('Nuevo pedido recibido')}
+      ${p(`Se ha realizado un nuevo pedido en la tienda.`)}
+      <div style="margin:20px 0;padding:12px 16px;background:rgba(214,186,255,0.08);border-radius:6px;border-left:3px solid #d6baff;">
+        <p style="color:#d6baff;font-size:12px;font-family:monospace;margin:0 0 4px;letter-spacing:1px;">PEDIDO #${orderId}</p>
+        <p style="color:rgba(255,255,255,0.5);font-size:11px;margin:0;">Total: <strong style="color:#d6baff;">$${Number(order.total).toFixed(2)}</strong></p>
+        ${addr.fullName ? `<p style="color:rgba(255,255,255,0.5);font-size:11px;margin:4px 0 0;">Cliente: <strong style="color:rgba(255,255,255,0.8);">${addr.fullName}</strong></p>` : ''}
+        ${addr.city ? `<p style="color:rgba(255,255,255,0.5);font-size:11px;margin:2px 0 0;">Destino: ${addr.district || ''}, ${addr.city}</p>` : ''}
+      </div>
+      ${itemsTable(order.orderItems || [])}
+      ${totalsBlock(order)}
+      ${btn(`${FRONTEND_URL}/admin/orders`, 'Ver en Panel Admin')}
+      ${sm('Este correo es una notificación automática del sistema.')}
+    `),
+  });
+}
+

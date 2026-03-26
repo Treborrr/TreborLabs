@@ -13,7 +13,7 @@ export default async function postsRoutes(fastify) {
     const { category, tag, search, limit = '20', offset = '0' } = request.query;
     const where = { status: 'published' };
 
-    if (category) where.category = category;
+    if (category) where.category = category; // A7.2 — filtro por category
     if (tag) where.tags = { has: tag };
     if (search) {
       where.OR = [
@@ -21,13 +21,16 @@ export default async function postsRoutes(fastify) {
         { excerpt: { contains: search, mode: 'insensitive' } },
       ];
     }
+    // A7.3 — Limit max 100
+    const take = Math.min(parseInt(limit) || 20, 100);
+    const skip = parseInt(offset) || 0;
 
     const [posts, total] = await fastify.prisma.$transaction([
       fastify.prisma.post.findMany({
         where,
         orderBy: { publishedAt: 'desc' },
-        take: parseInt(limit),
-        skip: parseInt(offset),
+        take,
+        skip,
         include: { author: { select: { id: true, name: true, avatar: true } } },
       }),
       fastify.prisma.post.count({ where }),
@@ -35,6 +38,7 @@ export default async function postsRoutes(fastify) {
 
     return { posts, total };
   });
+
 
   // GET /api/posts/tags — tags únicos de posts publicados
   fastify.get('/api/posts/tags', async () => {

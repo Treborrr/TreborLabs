@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
+import SEOMeta from '../components/SEOMeta';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -37,7 +38,9 @@ const Wishlist = () => {
 
   return (
     <main className="pt-32 pb-20 px-6 max-w-6xl mx-auto min-h-screen">
+      <SEOMeta title="Wishlist" description="Tus productos favoritos guardados en Trebor Labs." />
       <div className="mb-10">
+
         <h1 className="font-headline font-black text-4xl tracking-tight mb-2">Wishlist</h1>
         <p className="text-on-surface-variant font-mono text-sm">{items.length} producto{items.length !== 1 ? 's' : ''} guardados</p>
       </div>

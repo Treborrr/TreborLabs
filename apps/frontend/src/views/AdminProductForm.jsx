@@ -36,10 +36,12 @@ const AdminProductForm = () => {
   const [toast, setToast]         = useState(null);
 
   const [form, setForm] = useState({
-    name: '', slug: '', category: 'keyboard', price: '', stock: '',
+    name: '', slug: '', category: '', price: '', stock: '',
     status: 'in_stock', featured: false, description: '', images: [],
     specs: {}, variants: [], afiche: null,
   });
+
+  const [categories, setCategories] = useState([]);
 
   // Variant editing state
   const [variantDraft, setVariantDraft] = useState(null); // null | { idx: number|null, label, color, available }
@@ -58,6 +60,9 @@ const AdminProductForm = () => {
         const data = await res.json();
         if (data.product) {
           const p = data.product;
+          if (!p.category && categories.length > 0) {
+            p.category = categories[0].slug;
+          }
           setForm({
             name: p.name, slug: p.slug, category: p.category,
             price: p.price, stock: p.stock, status: p.status,
@@ -73,6 +78,21 @@ const AdminProductForm = () => {
       }
     })();
   }, [id, isEdit]);
+
+  useEffect(() => {
+    fetch(`${API}/api/categories`)
+      .then(res => res.json())
+      .then(data => {
+        setCategories(data);
+        setForm(f => {
+          if (!f.category && data.length > 0) {
+            return { ...f, category: data[0].slug };
+          }
+          return f;
+        });
+      })
+      .catch(err => console.error("Error loading categories", err));
+  }, []);
 
   const set = (key, value) => setForm(f => ({ ...f, [key]: value }));
   const setSpec = (key, value) => setForm(f => ({ ...f, specs: { ...f.specs, [key]: value } }));
@@ -205,8 +225,10 @@ const AdminProductForm = () => {
                   value={form.category} onChange={e => set('category', e.target.value)} required
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none"
                 >
-                  <option value="keyboard">Teclado Custom</option>
-                  <option value="raspi">Raspberry Pi</option>
+                  <option value="" disabled>Selecciona categoría...</option>
+                  {categories.map(c => (
+                    <option key={c.slug} value={c.slug}>{c.name}</option>
+                  ))}
                 </select>
               </div>
               <div>

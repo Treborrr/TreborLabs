@@ -174,6 +174,32 @@ const AdminOrders = () => {
 
   useEffect(() => { load(); }, [load]);
 
+  // B7.1 — Export CSV
+  const exportCsv = () => {
+    if (!orders.length) return;
+    const rows = [
+      ['ID', 'Cliente', 'Email', 'Productos', 'Total', 'Estado', 'Fecha'],
+      ...orders.map(o => [
+        `#${o.id.slice(-6).toUpperCase()}`,
+        o.user?.name || o.address?.fullName || 'Guest',
+        o.user?.email || o.address?.email || '',
+        (o.items || []).map(i => i.name).join('; '),
+        Number(o.total).toFixed(2),
+        o.status,
+        new Date(o.createdAt).toLocaleDateString('es-PE'),
+      ]),
+    ];
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `trebor-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+
   const handleStatusChange = async (orderId, newStatus) => {
     setUpdatingId(orderId);
     try {
@@ -230,6 +256,14 @@ const AdminOrders = () => {
           >
             <span className="material-symbols-outlined text-sm">refresh</span>
             Actualizar
+          </button>
+          <button
+            onClick={exportCsv}
+            disabled={!orders.length}
+            className="flex items-center gap-2 bg-surface-container-high px-4 py-2.5 rounded-lg text-xs font-mono hover:bg-surface-container-highest transition-colors disabled:opacity-40"
+          >
+            <span className="material-symbols-outlined text-sm">download</span>
+            Exportar CSV
           </button>
           <ManualOrderModal onCreated={(order) => { setOrders(prev => [order, ...prev]); setTotal(t => t + 1); }} authFetch={authFetch} />
         </div>

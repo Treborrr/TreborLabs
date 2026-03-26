@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import SEOMeta from '../components/SEOMeta';
+import useSiteConfig from '../hooks/useSiteConfig';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -9,6 +10,7 @@ const Home = () => {
   const { addToCart } = useCart();
   const [featured, setFeatured] = useState([]);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
+  const { config, loading: configLoading } = useSiteConfig();
 
   useEffect(() => {
     fetch(`${API}/api/products?featured=true&limit=3`)
@@ -17,6 +19,18 @@ const Home = () => {
       .catch(() => setFeatured([]))
       .finally(() => setLoadingFeatured(false));
   }, []);
+
+  if (configLoading) {
+    return (
+      <main className="bg-surface text-on-surface min-h-screen pt-20 flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+        <p className="text-on-surface-variant font-mono text-sm">Cargando Trebor Labs...</p>
+      </main>
+    );
+  }
+
+  const hero = config?.hero || {};
+  const about = config?.about || {};
 
   return (
     <main className="bg-surface text-on-surface">
@@ -34,55 +48,58 @@ const Home = () => {
 
         <div className="relative z-10 max-w-7xl mx-auto px-8 w-full grid md:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
-            <div className="inline-flex items-center gap-3 px-3 py-1 border border-[#6b4c9a]/60 bg-transparent rounded-sm">
-              <span className="font-mono text-[10px] font-bold text-primary tracking-widest uppercase">
-                [MOD_V2.0]
-              </span>
-              <span className="font-mono text-[10px] font-medium tracking-widest uppercase text-gray-300">
-                Nueva Colección 2026
-              </span>
-            </div>
+            {hero.badge && (
+              <div className="inline-flex items-center gap-3 px-3 py-1 border border-[#6b4c9a]/60 bg-transparent rounded-sm">
+                <span className="font-mono text-[10px] font-bold text-primary tracking-widest uppercase">
+                  {hero.badge}
+                </span>
+              </div>
+            )}
 
             <h1 className="font-headline text-5xl md:text-7xl font-extrabold tracking-tighter leading-[1.1] text-on-surface">
-              Tu próximo gran proyecto{' '}
-              <span className="text-primary italic">empieza aquí.</span>
+              {hero.headlinePart1}{' '}
+              <span className="text-primary italic">{hero.headlinePart2}</span>
             </h1>
 
             <p className="text-on-surface-variant text-lg max-w-lg font-light leading-relaxed">
-              Hardware de precisión para mentes técnicas. Desde teclados mecánicos personalizados hasta kits Raspberry Pi de alto rendimiento.
+              {hero.subtitle}
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Link to="/products">
-                <button className="px-8 py-4 bg-primary-container text-on-primary-container rounded-md font-bold tracking-tight hover:shadow-[0_0_20px_rgba(107,76,154,0.4)] transition-all active:scale-95">
-                  Explorar Teclados
-                </button>
-              </Link>
-              <Link to="/raspi">
-                <button className="px-8 py-4 bg-secondary-container text-on-secondary-container rounded-md font-bold tracking-tight border border-secondary/20 hover:bg-secondary/10 transition-all active:scale-95">
-                  Descubre Raspi
-                </button>
-              </Link>
-              <Link to="/blog">
-                <button className="px-8 py-4 bg-surface-container-highest text-primary rounded-md font-bold tracking-tight hover:text-white transition-all active:scale-95">
-                  Lee el Blog
-                </button>
-              </Link>
+              {hero.ctaPrimary && hero.ctaPrimaryLink && (
+                <Link to={hero.ctaPrimaryLink}>
+                  <button className="px-8 py-4 bg-primary-container text-on-primary-container rounded-md font-bold tracking-tight hover:shadow-[0_0_20px_rgba(107,76,154,0.4)] transition-all active:scale-95">
+                    {hero.ctaPrimary}
+                  </button>
+                </Link>
+              )}
+              {hero.ctaSecondary && hero.ctaSecondaryLink && (
+                <Link to={hero.ctaSecondaryLink}>
+                  <button className="px-8 py-4 bg-secondary-container text-on-secondary-container rounded-md font-bold tracking-tight border border-secondary/20 hover:bg-secondary/10 transition-all active:scale-95">
+                    {hero.ctaSecondary}
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
 
           <div className="relative hidden md:block">
             <div className="aspect-square bg-surface-container-high rounded-xl overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-500">
               <img
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDC4F6gV9FO7T7gXcp2-vC2TnCGhhlMnsT7Xyl5CnhQEsNqF_l_KqHbDeJBwNRKg34R65CYDhBz2AyKPv1EYZohl7fVQe40_moa0J6R8392u5Ghb2t7EPek9jY2B0GwdIs0usdbFbjR7kyAxjWNSvNzu1kHo7EgWCF1JOvQ4MlV0aWeSDTgOSioP3YGFD_XECXCvBEU-IsY9eFqRMGAMinSKGfyugVudgo1I8ke-ADBaJYK1qzkqvvrsZiCTFEV3cSsHvT3Vtfs3aV"
-                alt="Custom Mechanical Keyboard"
+                src={hero.image ? (hero.image.startsWith('http') ? hero.image : `${API}${hero.image}`) : "https://lh3.googleusercontent.com/aida-public/AB6AXuDDC4F6gV9FO7T7gXcp2-vC2TnCGhhlMnsT7Xyl5CnhQEsNqF_l_KqHbDeJBwNRKg34R65CYDhBz2AyKPv1EYZohl7fVQe40_moa0J6R8392u5Ghb2t7EPek9jY2B0GwdIs0usdbFbjR7kyAxjWNSvNzu1kHo7EgWCF1JOvQ4MlV0aWeSDTgOSioP3YGFD_XECXCvBEU-IsY9eFqRMGAMinSKGfyugVudgo1I8ke-ADBaJYK1qzkqvvrsZiCTFEV3cSsHvT3Vtfs3aV"}
+                alt="Hero Highlight"
                 className="w-full h-full object-cover"
+                loading="eager"
               />
             </div>
-            <div className="absolute -bottom-8 -left-8 p-6 bg-surface-container-highest rounded-xl shadow-xl max-w-[200px] border border-outline-variant/30">
-              <span className="font-mono text-[10px] text-primary block mb-2 tracking-widest uppercase">Spec Highlights</span>
-              <p className="font-headline font-bold text-sm text-on-surface">65% Layout, Gasket Mount, CNC Aluminum</p>
-            </div>
+            {hero.specCard && Object.keys(hero.specCard).length > 0 && (
+              <div className="absolute -bottom-8 -left-8 p-6 bg-surface-container-highest rounded-xl shadow-xl max-w-[200px] border border-outline-variant/30">
+                <span className="font-mono text-[10px] text-primary block mb-2 tracking-widest uppercase">Spec Highlights</span>
+                {Object.values(hero.specCard).map((val, idx) => (
+                  <p key={idx} className="font-headline font-bold text-sm text-on-surface">{val}</p>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -155,7 +172,10 @@ const Home = () => {
                     </Link>
                     <button
                       disabled={!inStock}
-                      onClick={() => addToCart({ id: product.id, name: product.name, price: product.price, image: imgSrc })}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        addToCart({ id: product.id, name: product.name, price: product.price, image: imgSrc });
+                      }}
                       className="w-full py-3 bg-surface-container-highest rounded-md text-on-surface text-sm font-bold hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed mt-2"
                     >
                       <span className="material-symbols-outlined text-sm">shopping_bag</span>
@@ -174,30 +194,30 @@ const Home = () => {
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-24 items-center">
           <div className="relative">
             <div className="absolute -top-12 -left-12 text-[120px] font-black text-primary/5 select-none leading-none">TECH</div>
-            <h2 className="font-headline text-4xl font-bold tracking-tight text-on-surface mb-8">Sobre Trebor Labs</h2>
+            {about.title && <h2 className="font-headline text-4xl font-bold tracking-tight text-on-surface mb-8">{about.title}</h2>}
             <div className="space-y-6 text-on-surface-variant leading-relaxed">
-              <p>
-                No somos solo una tienda de hardware; somos un laboratorio para el artesano digital. Creemos que las herramientas con las que interactúas cada día deben ser tan precisas como el código que escribes.
-              </p>
-              <p>
-                Desde Perú, curamos y diseñamos componentes que cierran la brecha entre la electrónica cruda y la experiencia de usuario refinada. Cada interruptor, cada PCB y cada línea de nuestro blog está pensada para el profesional que no se conforma con lo estándar.
-              </p>
+              {about.paragraphs && about.paragraphs.map((p, idx) => (
+                <p key={idx}>{p}</p>
+              ))}
             </div>
-            <div className="mt-12">
-              <a className="inline-flex items-center gap-4 group cursor-pointer" href="#">
-                <span className="w-12 h-[1px] bg-primary group-hover:w-20 transition-all"></span>
-                <span className="font-headline font-bold uppercase tracking-widest text-sm text-primary">Nuestra Filosofía</span>
-              </a>
-            </div>
+            {about.cta && about.ctaLink && (
+              <div className="mt-12">
+                <Link to={about.ctaLink} className="inline-flex items-center gap-4 group cursor-pointer">
+                  <span className="w-12 h-[1px] bg-primary group-hover:w-20 transition-all"></span>
+                  <span className="font-headline font-bold uppercase tracking-widest text-sm text-primary">{about.cta}</span>
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-4">
               <div className="aspect-[3/4] rounded-lg bg-surface-container-high overflow-hidden grayscale hover:grayscale-0 transition-all">
                 <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjeCdHzmWOEmgxVUOvCVLamPKH4FVOvlIyu21XqkW40z9ZYvPKM2gTcdSQ5SGzO7GBNQmijGAfLAXx3N2FjSP3CS7MDzXyN905P8SBQIW5f0rKkRCequv7v6uXtzfC773_UWsKx1G2snoNshzgEfh0R_GLxgnUutBoJ5d31x81Rrx4zJwTJ5QBkJhnAgtmdthnb3O-EumK6C8V6stWd1MENiT0Ht0nO4S3x65CUpLUfj-y_T5i8uzoFscmKxCKPEZ1gkXyb0DosOMp"
-                  alt="Circuit Detail"
+                  src={about.images?.[0] ? (about.images[0].startsWith('http') ? about.images[0] : `${API}${about.images[0]}`) : "https://lh3.googleusercontent.com/aida-public/AB6AXuCjeCdHzmWOEmgxVUOvCVLamPKH4FVOvlIyu21XqkW40z9ZYvPKM2gTcdSQ5SGzO7GBNQmijGAfLAXx3N2FjSP3CS7MDzXyN905P8SBQIW5f0rKkRCequv7v6uXtzfC773_UWsKx1G2snoNshzgEfh0R_GLxgnUutBoJ5d31x81Rrx4zJwTJ5QBkJhnAgtmdthnb3O-EumK6C8V6stWd1MENiT0Ht0nO4S3x65CUpLUfj-y_T5i8uzoFscmKxCKPEZ1gkXyb0DosOMp"}
+                  alt="About visual 1"
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <div className="h-32 rounded-lg bg-primary-container/20 flex items-center justify-center border border-primary/10">
@@ -210,9 +230,10 @@ const Home = () => {
               </div>
               <div className="aspect-[3/4] rounded-lg bg-surface-container-high overflow-hidden grayscale hover:grayscale-0 transition-all">
                 <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9wKqSi4MUHN6f2lrbJOat58R47pWrpMQXt-Ht9-vcBbjudUxRaDemw4sfjczFwyg86IdWXU2We5N5FLnVJD5faWpd9YDC-AZeuoSqJ6vUHDvSkrDupxyDb6waodR7hLdu2Gzs9r9vuJKJL2uIDvPf49T7wHaBgsiI-Zcp6AyiJOXFG0A8jmnQvUcOZfC8cqRWhRfS34_en2IXelscnwvzocXyc9BrkYl7Wx4isf-HtiVSBUzdNn4mjEQeMLJYQjPe2s1LFGG9sbjv"
-                  alt="Mechanical Switch"
+                  src={about.images?.[1] ? (about.images[1].startsWith('http') ? about.images[1] : `${API}${about.images[1]}`) : "https://lh3.googleusercontent.com/aida-public/AB6AXuB9wKqSi4MUHN6f2lrbJOat58R47pWrpMQXt-Ht9-vcBbjudUxRaDemw4sfjczFwyg86IdWXU2We5N5FLnVJD5faWpd9YDC-AZeuoSqJ6vUHDvSkrDupxyDb6waodR7hLdu2Gzs9r9vuJKJL2uIDvPf49T7wHaBgsiI-Zcp6AyiJOXFG0A8jmnQvUcOZfC8cqRWhRfS34_en2IXelscnwvzocXyc9BrkYl7Wx4isf-HtiVSBUzdNn4mjEQeMLJYQjPe2s1LFGG9sbjv"}
+                  alt="About visual 2"
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </div>
             </div>

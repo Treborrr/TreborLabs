@@ -31,6 +31,9 @@ import adminUsersRoutes from './routes/adminUsers.js';
 import referralRoutes from './routes/referrals.js';
 import notificationRoutes from './routes/notifications.js';
 import analyticsRoutes from './routes/analytics.js';
+import siteConfigRoutes from './routes/siteConfig.js';
+import categoriesRoutes from './routes/categories.js';
+
 
 const PORT = parseInt(process.env.PORT || '3001');
 const BACKEND_URL = process.env.BACKEND_URL || `http://localhost:${PORT}`;
@@ -46,7 +49,10 @@ const fastify = Fastify({
       options: { colorize: true, translateTime: 'HH:MM:ss' },
     },
   },
+  // A4.1 — Limitar JSON body a 1MB
+  bodyLimit: 1_048_576,
 });
+
 
 // ─── Rate limiting ───────────────────────────────────────────────────────────
 
@@ -157,13 +163,27 @@ await fastify.register(adminUsersRoutes);
 await fastify.register(referralRoutes);
 await fastify.register(notificationRoutes);
 await fastify.register(analyticsRoutes);
+await fastify.register(siteConfigRoutes);
+await fastify.register(categoriesRoutes);
 
-// Health check
-fastify.get('/api/health', async () => ({
-  status: 'ok',
-  version: '1.0.0',
-  timestamp: new Date().toISOString(),
-}));
+
+// A4.2 — Health check enriquecido
+fastify.get('/api/health', async () => {
+  let dbStatus = 'ok';
+  try {
+    await fastify.prisma.$queryRaw`SELECT 1`;
+  } catch {
+    dbStatus = 'error';
+  }
+  return {
+    status: 'ok',
+    db: dbStatus,
+    uptime: Math.floor(process.uptime()),
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+  };
+});
+
 
 // ─── Upload de imágenes ──────────────────────────────────────────────────────
 
@@ -280,6 +300,17 @@ try {
   fastify.log.error(err);
   process.exit(1);
 }
+
+// A4.3 — Manejo global de errores no capturados
+process.on('unhandledRejection', (reason) => {
+  fastify.log.error({ reason }, 'Unhandled Promise Rejection');
+});
+
+process.on('uncaughtException', (err) => {
+  fastify.log.error({ err }, 'Uncaught Exception — cerrando servidor');
+  fastify.close(() => process.exit(1));
+});
+
 
 // ─── Seed: admin user from .env ──────────────────────────────────────────────
 

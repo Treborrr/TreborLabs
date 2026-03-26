@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import SEOMeta from '../components/SEOMeta';
 
 const Contact = () => {
   const [sent, setSent] = useState(false);
@@ -12,7 +13,9 @@ const Contact = () => {
 
   return (
     <main className="bg-surface text-on-surface">
+      <SEOMeta title="Contacto" description="Contáctanos para soporte técnico, builds personalizados o consultas. Respondemos en menos de 24h." />
       {/* Hero */}
+
       <header className="relative pt-32 pb-20 px-8 overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-30">
           <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary-container/20 rounded-full blur-[120px]"></div>
