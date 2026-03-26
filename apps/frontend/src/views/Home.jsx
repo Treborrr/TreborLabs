@@ -158,14 +158,28 @@ const Home = () => {
           </div>
 
           <div className="relative hidden md:block">
-            <div className="aspect-square bg-surface-container-high rounded-xl overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-500">
-              <img
-                src={hero.image ? (hero.image.startsWith('http') ? hero.image : `${API}${hero.image}`) : "https://lh3.googleusercontent.com/aida-public/AB6AXuDDC4F6gV9FO7T7gXcp2-vC2TnCGhhlMnsT7Xyl5CnhQEsNqF_l_KqHbDeJBwNRKg34R65CYDhBz2AyKPv1EYZohl7fVQe40_moa0J6R8392u5Ghb2t7EPek9jY2B0GwdIs0usdbFbjR7kyAxjWNSvNzu1kHo7EgWCF1JOvQ4MlV0aWeSDTgOSioP3YGFD_XECXCvBEU-IsY9eFqRMGAMinSKGfyugVudgo1I8ke-ADBaJYK1qzkqvvrsZiCTFEV3cSsHvT3Vtfs3aV"}
-                alt="Hero Highlight"
-                className="w-full h-full object-cover"
-                loading="eager"
-              />
-            </div>
+            {(() => {
+              const heroImgSrc = hero.image
+                ? (hero.image.startsWith('http') ? hero.image : `${API}${hero.image}`)
+                : "https://lh3.googleusercontent.com/aida-public/AB6AXuDDC4F6gV9FO7T7gXcp2-vC2TnCGhhlMnsT7Xyl5CnhQEsNqF_l_KqHbDeJBwNRKg34R65CYDhBz2AyKPv1EYZohl7fVQe40_moa0J6R8392u5Ghb2t7EPek9jY2B0GwdIs0usdbFbjR7kyAxjWNSvNzu1kHo7EgWCF1JOvQ4MlV0aWeSDTgOSioP3YGFD_XECXCvBEU-IsY9eFqRMGAMinSKGfyugVudgo1I8ke-ADBaJYK1qzkqvvrsZiCTFEV3cSsHvT3Vtfs3aV";
+              return (
+                <div className="aspect-square bg-surface-container-high rounded-xl overflow-hidden shadow-2xl rotate-2 hover:rotate-0 transition-transform duration-500 relative">
+                  <img
+                    src={heroImgSrc}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-60"
+                  />
+                  <img
+                    src={heroImgSrc}
+                    alt="Hero Highlight"
+                    className="relative z-10 w-full h-full object-contain"
+                    loading="eager"
+                  />
+                </div>
+              );
+            })()}
+
             {hero.specCard && Object.keys(hero.specCard).length > 0 && (
               <div className="absolute -bottom-8 -left-8 p-6 bg-surface-container-highest rounded-xl shadow-xl max-w-[200px] border border-outline-variant/30">
                 <span className="font-mono text-[10px] text-primary block mb-2 tracking-widest uppercase">Spec Highlights</span>

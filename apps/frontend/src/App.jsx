@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
@@ -71,6 +71,11 @@ const PageLoader = () => (
 
 function AppContent() {
   const location = useLocation();
+
+  // Reset scroll to top on every route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
   const isAdmin = location.pathname.startsWith('/admin');
   const hideNav = isAdmin
     || ['/login', '/register', '/forgot-password', '/auth/callback', '/checkout'].includes(location.pathname)

@@ -31,14 +31,14 @@ const AdminSidebar = () => {
     <aside className="h-full w-full bg-[#131315] flex flex-col border-r border-primary/15">
       <div className="p-6 pb-4">
         <Link to="/" className="flex items-center gap-3 no-underline group mb-1">
-          <div className="relative w-8 h-8 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
+          <div className="relative w-12 h-12 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
             <img src="/logo.png" alt="Trebor Labs" className="w-full h-full object-contain relative z-10" />
             <div className="logo-ring-base" aria-hidden="true" />
             <div className="logo-tracer-ring" aria-hidden="true" />
           </div>
-          <span className="text-primary font-bold text-base font-headline tracking-tight">Trebor Labs</span>
+          <span className="text-primary font-bold text-lg font-headline tracking-tight">Trebor Labs</span>
         </Link>
-        <p className="font-mono text-[10px] tracking-widest text-on-surface-variant/60 uppercase pl-11">Admin Panel</p>
+        <p className="font-mono text-[10px] tracking-widest text-on-surface-variant/60 uppercase pl-[60px]">Admin Panel</p>
       </div>
       <nav className="flex-1 mt-4">
         {sidebarLinks.map((link) => {
