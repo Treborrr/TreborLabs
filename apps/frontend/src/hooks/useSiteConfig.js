@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import api from '../utils/api'; // Assuming api instance exists
 
+const API = import.meta.env.VITE_API_URL ?? '';
 const CACHE_KEY = 'trebor_site_config';
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
 
@@ -25,32 +25,28 @@ const useSiteConfig = () => {
               }
               return;
             }
-          } catch (e) {
-            console.warn('Invalid cache for site_config', e);
+          } catch {
+            // Cache inválida, continuar con fetch
           }
         }
 
-        // Llamar a API si no hay cache o expiró
-        const response = await api.get('/site-config');
-        const data = response.data.data;
+        // Fetch a la API
+        const res = await fetch(`${API}/api/site-config`);
+        if (!res.ok) throw new Error('site-config fetch failed');
+        const json = await res.json();
+        const data = json.data ?? json;
 
-        // Guardar cache
+        // Guardar en cache
         sessionStorage.setItem(
           CACHE_KEY,
-          JSON.stringify({
-            data,
-            timestamp: Date.now()
-          })
+          JSON.stringify({ data, timestamp: Date.now() })
         );
 
         if (isMounted) {
           setConfig(data);
           setLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching site config:', error);
-        // Retornar un fallback explícito si la API falla de forma drástica, 
-        // aunque el backend ya retorna los defaults si no existe registro
+      } catch {
         if (isMounted) {
           setConfig(null);
           setLoading(false);
@@ -60,9 +56,7 @@ const useSiteConfig = () => {
 
     fetchConfig();
 
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
   return { config, loading };
