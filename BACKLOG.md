@@ -2,6 +2,11 @@
 
 > Tareas pendientes ordenadas por prioridad para llegar a producción en Railway.
 > Última actualización: 2026-03-25
+>
+> **Variables de entorno:** todo se configura en Railway dashboard o en `apps/backend/.env` /
+> `apps/frontend/.env` localmente. Nada de secrets en la DB ni en el admin UI.
+> La única variable del frontend es `VITE_API_URL`. Si en el futuro se implementan
+> MercadoPago Bricks, agregar `VITE_MP_PUBLIC_KEY` en Railway como variable de build.
 
 ---
 
@@ -71,6 +76,30 @@
 ---
 
 ### A5 — Deploy Railway
+
+> Variables de entorno a configurar en Railway dashboard (nunca en el repo):
+>
+> | Variable | Servicio | Nota |
+> |---|---|---|
+> | `DATABASE_URL` | Backend | Railway la provee automáticamente con su PostgreSQL |
+> | `JWT_SECRET` | Backend | `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
+> | `ADMIN_EMAIL` | Backend | Email del admin inicial |
+> | `ADMIN_PASSWORD` | Backend | Contraseña fuerte, cámbiala del default de desarrollo |
+> | `FRONTEND_URL` | Backend | URL pública del frontend en Railway |
+> | `BACKEND_URL` | Backend | URL pública del backend en Railway |
+> | `GOOGLE_CLIENT_ID` | Backend | Rotar antes de publicar |
+> | `GOOGLE_CLIENT_SECRET` | Backend | Rotar antes de publicar |
+> | `GITHUB_CLIENT_ID` | Backend | Rotar antes de publicar |
+> | `GITHUB_CLIENT_SECRET` | Backend | Rotar antes de publicar |
+> | `MP_ACCESS_TOKEN` | Backend | Token de producción de MercadoPago |
+> | `GMAIL_USER` | Backend | Tu correo Gmail |
+> | `GMAIL_APP_PASSWORD` | Backend | App Password de Google (no tu contraseña real) |
+> | `NODE_ENV` | Backend | `production` |
+> | `VITE_API_URL` | Frontend | URL pública del backend (variable de build en Railway) |
+>
+> **No existe `VITE_MP_PUBLIC_KEY` por ahora.** Si en el futuro se migra a MercadoPago Bricks
+> (formulario embebido en vez de redirect), agregarla como variable de build del frontend en Railway.
+
 
 **A5.1** `apps/backend/railway.json`
 ```json
