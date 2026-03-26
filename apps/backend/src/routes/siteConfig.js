@@ -9,6 +9,11 @@ const defaultSiteConfig = {
     ctaSecondary: "Raspberry Pi",
     ctaSecondaryLink: "/products?category=raspi",
     image: null,
+    background: {
+      type: 'preset',
+      preset: 'amethyst-bloom',
+      url: null
+    },
     specCard: {
       switches: "Gateron Milky Yellow Pro",
       keycaps: "PBT Double Shot"

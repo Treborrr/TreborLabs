@@ -6,6 +6,82 @@ import useSiteConfig from '../hooks/useSiteConfig';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
+const HeroBackground = ({ config }) => {
+  const type = config?.type || 'preset';
+  const preset = config?.preset || 'amethyst-bloom';
+  const url = config?.url;
+
+  if (type === 'image' && url) {
+    const src = url.startsWith('http') ? url : `${API}${url}`;
+    return (
+      <div
+        className="absolute inset-0 z-0"
+        style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+      />
+    );
+  }
+
+  if (preset === 'deep-space') {
+    return (
+      <div className="absolute inset-0 z-0" style={{ background: '#050510' }}>
+        <div className="absolute bottom-1/4 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px] opacity-40" style={{ background: 'rgba(6,182,212,0.4)' }} />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[100px] opacity-40" style={{ background: 'rgba(124,58,237,0.45)' }} />
+      </div>
+    );
+  }
+
+  if (preset === 'neon-grid') {
+    return (
+      <div className="absolute inset-0 z-0" style={{ background: '#0d0d14' }}>
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(139,92,246,0.12) 49px, rgba(139,92,246,0.12) 50px), repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(139,92,246,0.12) 49px, rgba(139,92,246,0.12) 50px)',
+          }}
+        />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-[150px] opacity-30" style={{ background: 'rgba(139,92,246,0.5)' }} />
+      </div>
+    );
+  }
+
+  if (preset === 'mesh-gradient') {
+    return (
+      <div
+        className="absolute inset-0 z-0"
+        style={{ background: 'linear-gradient(135deg, #1e0a3c 0%, #0d1440 25%, #1a0d33 50%, #0d0d1a 75%, #050510 100%)' }}
+      />
+    );
+  }
+
+  if (preset === 'dot-matrix') {
+    return (
+      <div className="absolute inset-0 z-0" style={{ background: '#0d0d14' }}>
+        <div
+          className="absolute inset-0 opacity-25"
+          style={{
+            backgroundImage: 'radial-gradient(circle, rgba(139,92,246,0.5) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-[130px] opacity-30" style={{ background: 'rgba(139,92,246,0.5)' }} />
+      </div>
+    );
+  }
+
+  if (preset === 'void-dark') {
+    return <div className="absolute inset-0 z-0" style={{ background: '#0d0d14' }} />;
+  }
+
+  // Default: amethyst-bloom
+  return (
+    <div className="absolute inset-0 z-0 opacity-40">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-container/20 rounded-full blur-[120px]" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary-container/10 rounded-full blur-[100px]" />
+    </div>
+  );
+};
+
 const Home = () => {
   const { addToCart } = useCart();
   const [featured, setFeatured] = useState([]);
@@ -40,11 +116,7 @@ const Home = () => {
       />
       {/* Hero Section */}
       <header className="relative w-full min-h-screen flex items-center pt-20 overflow-hidden bg-surface">
-        {/* Ambient background blobs */}
-        <div className="absolute inset-0 z-0 opacity-40">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary-container/20 rounded-full blur-[120px]"></div>
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary-container/10 rounded-full blur-[100px]"></div>
-        </div>
+        <HeroBackground config={hero.background} />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-8 w-full grid md:grid-cols-2 gap-8 md:gap-16 items-center">
           <div className="space-y-8">

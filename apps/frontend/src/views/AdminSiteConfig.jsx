@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import useSiteConfig from '../hooks/useSiteConfig';
 import { useAuth } from '../context/AuthContext';
+import LinkPicker from '../components/LinkPicker';
+import HeroBgPicker from '../components/HeroBgPicker';
 
 const AdminSiteConfig = () => {
   const { authFetch, API } = useAuth();
@@ -50,6 +52,31 @@ const AdminSiteConfig = () => {
       ...prev,
       about: { ...prev.about, paragraphs: newParagraphs }
     }));
+  };
+
+  const handleBgUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const data = new FormData();
+    data.append('file', file);
+    try {
+      const res = await authFetch(`${API}/api/admin/upload`, { method: 'POST', body: data });
+      if (!res.ok) throw new Error('Upload failed');
+      const d = await res.json();
+      setFormData(prev => ({
+        ...prev,
+        hero: {
+          ...prev.hero,
+          background: { ...(prev.hero.background || {}), type: 'image', url: d.url }
+        }
+      }));
+      showToast('Imagen subida con éxito');
+    } catch {
+      showToast('Error subiendo imagen', 'error');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleUpload = async (e, section, field, index = null) => {
@@ -160,7 +187,7 @@ const AdminSiteConfig = () => {
               </div>
               <div>
                 <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA Principal (Link)</label>
-                <input type="text" value={formData.hero.ctaPrimaryLink || ''} onChange={(e) => handleChange('hero', 'ctaPrimaryLink', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
+                <LinkPicker value={formData.hero.ctaPrimaryLink || ''} onChange={(v) => handleChange('hero', 'ctaPrimaryLink', v)} />
               </div>
 
               <div>
@@ -169,9 +196,19 @@ const AdminSiteConfig = () => {
               </div>
               <div>
                 <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA Secundario (Link)</label>
-                <input type="text" value={formData.hero.ctaSecondaryLink || ''} onChange={(e) => handleChange('hero', 'ctaSecondaryLink', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
+                <LinkPicker value={formData.hero.ctaSecondaryLink || ''} onChange={(v) => handleChange('hero', 'ctaSecondaryLink', v)} />
               </div>
               
+              <div className="md:col-span-2">
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-3">Fondo del Hero</label>
+                <HeroBgPicker
+                  value={formData.hero.background || { type: 'preset', preset: 'amethyst-bloom', url: null }}
+                  onChange={(bgConfig) => handleChange('hero', 'background', bgConfig)}
+                  onUpload={handleBgUpload}
+                  uploading={uploading}
+                />
+              </div>
+
               <div className="md:col-span-2">
                 <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Imagen Principal (Cuadro Rotado)</label>
                 <div className="flex items-center gap-4 bg-surface-container px-4 py-3 border border-outline-variant/30 rounded-lg">
@@ -224,7 +261,7 @@ const AdminSiteConfig = () => {
               </div>
               <div>
                 <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA (Link)</label>
-                <input type="text" value={formData.about.ctaLink || ''} onChange={(e) => handleChange('about', 'ctaLink', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
+                <LinkPicker value={formData.about.ctaLink || ''} onChange={(v) => handleChange('about', 'ctaLink', v)} />
               </div>
 
               <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-outline-variant/10 mt-2">
