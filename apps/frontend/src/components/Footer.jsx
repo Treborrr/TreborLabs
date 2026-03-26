@@ -10,9 +10,9 @@ const Footer = () => {
     <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
       {/* Brand */}
       <div className="md:col-span-1">
-        <Link to="/" className="flex items-center gap-2 no-underline mb-3">
-          <img src="/logo.png" alt="Trebor Labs" className="w-10 h-10 object-contain" />
-          <span className="font-headline font-black text-primary tracking-tighter text-xl">Trebor Labs</span>
+        <Link to="/" className="flex items-center gap-4 no-underline mb-4">
+          <img src="/logo.png" alt="Trebor Labs" className="w-14 h-14 object-contain" />
+          <span className="font-headline font-black text-primary tracking-tighter text-3xl">Trebor Labs</span>
         </Link>
         <p className="text-xs text-on-surface-variant font-mono leading-relaxed">
           {tagline}
