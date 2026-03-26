@@ -46,7 +46,7 @@ const Home = () => {
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary-container/10 rounded-full blur-[100px]"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-8 w-full grid md:grid-cols-2 gap-16 items-center">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-8 w-full grid md:grid-cols-2 gap-8 md:gap-16 items-center">
           <div className="space-y-8">
             {hero.badge && (
               <div className="inline-flex items-center gap-3 px-3 py-1 border border-[#6b4c9a]/60 bg-transparent rounded-sm">
@@ -56,7 +56,7 @@ const Home = () => {
               </div>
             )}
 
-            <h1 className="font-headline text-5xl md:text-7xl font-extrabold tracking-tighter leading-[1.1] text-on-surface">
+            <h1 className="font-headline text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tighter leading-[1.1] text-on-surface">
               {hero.headlinePart1}{' '}
               <span className="text-primary italic">{hero.headlinePart2}</span>
             </h1>
@@ -105,7 +105,7 @@ const Home = () => {
       </header>
 
       {/* Featured Products */}
-      <section className="bg-surface-container-low py-32 px-8">
+      <section className="bg-surface-container-low py-20 md:py-32 px-6 md:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-end mb-16">
             <div>
@@ -190,7 +190,7 @@ const Home = () => {
       </section>
 
       {/* About Snippet */}
-      <section className="bg-surface py-32 px-8 overflow-hidden">
+      <section className="bg-surface py-20 md:py-32 px-6 md:px-8 overflow-hidden">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-24 items-center">
           <div className="relative">
             <div className="absolute -top-12 -left-12 text-[120px] font-black text-primary/5 select-none leading-none">TECH</div>

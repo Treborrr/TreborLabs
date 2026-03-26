@@ -94,7 +94,7 @@ const AdminCategories = () => {
     <>
       <main className="min-h-screen bg-surface-container-low flex flex-col w-full">
         {/* Header */}
-        <header className="h-20 px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
+        <header className="h-20 px-4 md:px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
           <div>
             <h2 className="font-headline font-bold text-2xl text-on-surface tracking-tight">Gestión de Categorías</h2>
             <p className="text-xs font-mono text-on-surface-variant">/root/admin/categories_v1</p>
@@ -108,7 +108,7 @@ const AdminCategories = () => {
           </button>
         </header>
 
-        <div className="p-10 space-y-6">
+        <div className="p-4 md:p-10 space-y-6">
           {/* Create Form */}
           {showAdd && (
             <section className="bg-surface p-6 rounded-xl shadow-2xl animate-fade-in">

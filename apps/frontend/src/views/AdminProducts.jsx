@@ -85,7 +85,7 @@ const AdminProducts = () => {
     <>
       <main className="min-h-screen bg-surface-container-low flex flex-col w-full">
         {/* Header */}
-        <header className="h-20 px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
+        <header className="h-20 px-4 md:px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
           <div>
             <h2 className="font-headline font-bold text-2xl text-on-surface tracking-tight">Gestión de Productos</h2>
             <p className="text-xs font-mono text-on-surface-variant">/root/admin/products_v1</p>
@@ -99,7 +99,7 @@ const AdminProducts = () => {
           </Link>
         </header>
 
-        <div className="p-10 space-y-6">
+        <div className="p-4 md:p-10 space-y-6">
           {/* Filters */}
           <section className="bg-surface p-6 rounded-xl shadow-2xl">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">

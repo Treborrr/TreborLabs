@@ -28,7 +28,7 @@ const AdminSidebar = () => {
   const { user } = useAuth();
 
   return (
-    <aside className="h-screen w-64 fixed left-0 top-0 bg-[#131315] flex flex-col border-r border-primary/15 z-50">
+    <aside className="h-full w-full bg-[#131315] flex flex-col border-r border-primary/15">
       <div className="p-6 pb-4">
         <Link to="/" className="flex items-center gap-3 no-underline group mb-1">
           <div className="relative w-8 h-8 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">

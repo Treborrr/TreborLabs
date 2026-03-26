@@ -44,7 +44,7 @@ const AdminDashboard = () => {
   return (
     <main className="min-h-screen bg-surface-container-low flex flex-col w-full">
         {/* Top Bar */}
-        <header className="h-20 px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
+        <header className="h-20 px-4 md:px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
           <div>
             <h2 className="font-headline font-bold text-2xl text-on-surface tracking-tight">Dashboard Overview</h2>
             <p className="text-xs font-mono text-on-surface-variant">/root/admin/dashboard</p>
@@ -61,7 +61,7 @@ const AdminDashboard = () => {
           </div>
         </header>
 
-        <div className="p-10 space-y-8 overflow-y-auto">
+        <div className="p-4 md:p-10 space-y-8 overflow-y-auto">
           {loading ? (
             <div className="flex justify-center py-24">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -157,9 +157,9 @@ const AdminDashboard = () => {
                 {orders.length > 0 ? (
                   <div className="space-y-4">
                     {orders.map(order => (
-                      <div key={order.id} className="flex items-center justify-between p-4 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors">
+                      <div key={order.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-surface-container-low rounded-lg hover:bg-surface-container-high transition-colors gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-primary-container/20 rounded-lg flex items-center justify-center">
+                          <div className="w-10 h-10 bg-primary-container/20 rounded-lg flex items-center justify-center shrink-0">
                             <span className="material-symbols-outlined text-primary text-sm">receipt</span>
                           </div>
                           <div>

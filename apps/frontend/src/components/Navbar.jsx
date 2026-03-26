@@ -63,7 +63,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-8 h-20 bg-[#131315]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(107,76,154,0.08)]">
+      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-4 md:px-8 h-20 bg-[#131315]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(107,76,154,0.08)]">
         {/* Logo */}
         <div className="flex items-center gap-4">
           <Link to="/" className="flex items-center gap-3 no-underline group">
