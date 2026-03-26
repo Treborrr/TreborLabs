@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import AdminSidebar from '../components/AdminSidebar';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -78,10 +77,8 @@ const AdminBlog = () => {
   };
 
   return (
-    <div className="flex bg-surface min-h-screen text-on-surface">
-      <AdminSidebar />
-
-      <main className="ml-64 min-h-screen bg-surface-container-low flex flex-col w-full">
+    <>
+      <main className="min-h-screen bg-surface-container-low flex flex-col w-full">
         <header className="h-20 px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
           <div>
             <h2 className="font-headline font-bold text-2xl text-on-surface tracking-tight">Blog Management</h2>
@@ -222,7 +219,7 @@ const AdminBlog = () => {
           {toast.msg}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

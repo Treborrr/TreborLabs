@@ -220,31 +220,6 @@ const RaspiCatalog = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="mt-32 pt-12 border-t border-primary/10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="space-y-4">
-            <span className="text-primary font-headline font-bold text-xl uppercase tracking-widest italic">Trebor Labs</span>
-            <p className="font-body text-sm text-gray-400">© 2026 Trebor Labs. Technical Hardware Editorial.</p>
-          </div>
-          {[
-            { title: 'Pi Kits', links: ['Starter Kits', 'NAS Server', 'IoT Bundles', 'AI Vision'] },
-            { title: 'Soporte', links: ['Documentación', 'GitHub', 'Foro Comunidad'] },
-          ].map(({ title, links }) => (
-            <div key={title} className="space-y-4">
-              <p className="font-mono text-[10px] text-primary tracking-widest uppercase">{title}</p>
-              <ul className="space-y-2">{links.map((l) => <li key={l}><a className="font-body text-sm text-gray-500 hover:text-primary transition-all" href="#">{l}</a></li>)}</ul>
-            </div>
-          ))}
-          <div className="space-y-4">
-            <p className="font-mono text-[10px] text-primary tracking-widest uppercase">Newsletter</p>
-            <div className="flex border-b border-outline-variant pb-2">
-              <input className="bg-transparent border-none text-xs w-full focus:outline-none placeholder:text-gray-600" placeholder="email@labs.com" type="email" />
-              <button className="text-primary"><span className="material-symbols-outlined">arrow_forward</span></button>
-            </div>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 };

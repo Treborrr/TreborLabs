@@ -1,11 +1,44 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useWishlist } from '../context/WishlistContext';
+
+const API = import.meta.env.VITE_API_URL ?? '';
 
 const Navbar = () => {
   const location = useLocation();
   const { count } = useCart();
-  const { user } = useAuth();
+  const { user, authFetch } = useAuth();
+  const { count: wishlistCount } = useWishlist();
+
+  const [notifCount, setNotifCount] = useState(0);
+  const [notifs, setNotifs]         = useState([]);
+  const [notifOpen, setNotifOpen]   = useState(false);
+
+  useEffect(() => {
+    if (!user) { setNotifCount(0); setNotifs([]); return; }
+    const load = () => {
+      authFetch(`${API}/api/notifications?limit=5`)
+        .then(r => r.ok ? r.json() : null)
+        .then(d => {
+          if (!d) return;
+          const all = d.notifications || [];
+          setNotifs(all);
+          setNotifCount(all.filter(n => !n.readAt).length);
+        })
+        .catch(() => {});
+    };
+    load();
+    const iv = setInterval(load, 60000);
+    return () => clearInterval(iv);
+  }, [user]);
+
+  const markAllRead = async () => {
+    setNotifCount(0);
+    setNotifs(prev => prev.map(n => ({ ...n, readAt: n.readAt || new Date().toISOString() })));
+    await authFetch(`${API}/api/notifications/read-all`, { method: 'PATCH' }).catch(() => {});
+  };
 
   const navLinks = [
     {
@@ -94,11 +127,68 @@ const Navbar = () => {
       </div>
 
       {/* Right Icons */}
-      <div className="flex items-center gap-6 text-primary">
-        <button className="flex items-center gap-2 hover:text-white transition-colors">
-          <span className="material-symbols-outlined">language</span>
-          <span className="font-mono text-xs uppercase tracking-widest">ES</span>
-        </button>
+      <div className="flex items-center gap-5 text-primary">
+        {/* Wishlist */}
+        <Link to="/wishlist" className="relative text-primary hover:text-white transition-colors">
+          <span className="material-symbols-outlined cursor-pointer hover:scale-110 transition-transform">favorite_border</span>
+          {wishlistCount > 0 && (
+            <span className="absolute -top-2 -right-2 w-4 h-4 bg-primary text-surface text-[9px] font-black rounded-full flex items-center justify-center leading-none">
+              {wishlistCount > 9 ? '9+' : wishlistCount}
+            </span>
+          )}
+        </Link>
+
+        {/* Notifications */}
+        {user && (
+          <div className="relative">
+            <button
+              onClick={() => setNotifOpen(o => !o)}
+              className="relative text-primary hover:text-white transition-colors"
+            >
+              <span className="material-symbols-outlined cursor-pointer hover:scale-110 transition-transform">notifications</span>
+              {notifCount > 0 && (
+                <span className="absolute -top-2 -right-2 w-4 h-4 bg-error text-white text-[9px] font-black rounded-full flex items-center justify-center leading-none">
+                  {notifCount > 9 ? '9+' : notifCount}
+                </span>
+              )}
+            </button>
+            {notifOpen && (
+              <div className="absolute right-0 top-full mt-3 w-80 bg-[#131315]/98 backdrop-blur-md rounded-xl border border-primary/20 shadow-[0_10px_40px_rgba(107,76,154,0.2)] overflow-hidden z-50">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-outline-variant/15">
+                  <span className="font-headline font-bold text-sm">Notificaciones</span>
+                  {notifCount > 0 && (
+                    <button onClick={markAllRead} className="text-xs font-mono text-primary hover:underline">
+                      Marcar todas
+                    </button>
+                  )}
+                </div>
+                {notifs.length === 0 ? (
+                  <div className="px-4 py-6 text-center text-xs text-on-surface-variant">Sin notificaciones</div>
+                ) : (
+                  <div className="divide-y divide-outline-variant/10 max-h-72 overflow-y-auto">
+                    {notifs.map(n => (
+                      <div key={n.id} className={`px-4 py-3 flex items-start gap-3 ${n.readAt ? 'opacity-60' : ''}`}>
+                        <span className={`material-symbols-outlined text-sm mt-0.5 ${n.readAt ? 'text-on-surface-variant' : 'text-primary'}`} style={{ fontVariationSettings: n.readAt ? "'FILL' 0" : "'FILL' 1" }}>notifications</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-on-surface leading-tight">{n.title}</p>
+                          <p className="text-[11px] text-on-surface-variant mt-0.5 leading-tight">{n.body}</p>
+                        </div>
+                        {!n.readAt && <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0 mt-1.5" />}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="border-t border-outline-variant/15 px-4 py-2">
+                  <Link to="/notifications" onClick={() => setNotifOpen(false)} className="text-xs font-mono text-primary hover:underline no-underline block text-center">
+                    Ver todas
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Cart */}
         <Link to="/checkout" className="relative text-primary hover:text-white transition-colors">
           <span className="material-symbols-outlined cursor-pointer hover:scale-110 transition-transform">shopping_cart</span>
           {count > 0 && (
@@ -107,14 +197,12 @@ const Navbar = () => {
             </span>
           )}
         </Link>
+
+        {/* Profile */}
         {user ? (
           <Link to="/profile" className="flex items-center gap-2 text-primary hover:text-white transition-colors group">
             {user.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="w-7 h-7 rounded-full object-cover ring-1 ring-primary/40 group-hover:ring-primary transition-all"
-              />
+              <img src={user.avatar} alt={user.name} className="w-7 h-7 rounded-full object-cover ring-1 ring-primary/40 group-hover:ring-primary transition-all" />
             ) : (
               <div className="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-xs font-bold text-white">
                 {user.name?.charAt(0).toUpperCase() || '?'}

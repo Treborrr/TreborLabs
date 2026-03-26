@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import AdminSidebar from '../components/AdminSidebar';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 const LIMIT = 20;
@@ -19,7 +18,6 @@ const statusLabels = {
 
 const AdminProducts = () => {
   const { authFetch } = useAuth();
-  const navigate = useNavigate();
 
   const [products, setProducts]       = useState([]);
   const [total, setTotal]             = useState(0);
@@ -84,10 +82,8 @@ const AdminProducts = () => {
   };
 
   return (
-    <div className="flex bg-surface min-h-screen text-on-surface">
-      <AdminSidebar />
-
-      <main className="ml-64 min-h-screen bg-surface-container-low flex flex-col w-full">
+    <>
+      <main className="min-h-screen bg-surface-container-low flex flex-col w-full">
         {/* Header */}
         <header className="h-20 px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
           <div>
@@ -276,7 +272,7 @@ const AdminProducts = () => {
           {toast.msg}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

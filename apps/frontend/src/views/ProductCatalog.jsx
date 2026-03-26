@@ -1,6 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useMemo, useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
+import { imgUrl } from '../utils/imgUrl';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -14,6 +17,8 @@ const mapStatusColor = (s) => s === 'in_stock' ? 'bg-emerald-500/90' : s === 'co
 
 const ProductCatalog = () => {
   const { addToCart } = useCart();
+  const { user } = useAuth();
+  const { ids: wishlistIds, toggle: toggleWishlist } = useWishlist();
   const location = useLocation();
   const isRaspi       = location.pathname.includes('raspi');
   const currentCategory = isRaspi ? 'raspi' : 'keyboard';
@@ -197,7 +202,7 @@ const ProductCatalog = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-12">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="aspect-[4/5] mb-6 rounded-xl bg-surface-container-high" />
+                  <div className="aspect-square mb-6 rounded-xl bg-surface-container-high" />
                   <div className="h-4 bg-surface-container-high rounded w-3/4 mb-2" />
                   <div className="h-3 bg-surface-container-high rounded w-1/2" />
                 </div>
@@ -209,9 +214,9 @@ const ProductCatalog = () => {
                 const comingSoon = p.status !== 'in_stock';
                 return (
                   <div key={p.id} className="group">
-                    <div className="relative aspect-[4/5] mb-6 overflow-hidden rounded-xl bg-surface-container-low">
+                    <Link to={`/products/${p.slug || p.id}`} className="block relative aspect-square mb-6 overflow-hidden rounded-xl bg-surface-container-low no-underline">
                       {p.images?.[0]
-                        ? <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        ? <img src={imgUrl(p.images[0])} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                         : <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
                             <span className="material-symbols-outlined text-5xl">image</span>
                           </div>
@@ -222,15 +227,27 @@ const ProductCatalog = () => {
                         </span>
                       </div>
                       {comingSoon && <div className="absolute inset-0 bg-surface/40 group-hover:bg-transparent transition-all" />}
+                      {/* Wishlist button */}
+                      {user && (
+                        <button
+                          onClick={e => { e.preventDefault(); toggleWishlist(p.id); }}
+                          className="absolute top-3 right-3 w-9 h-9 bg-surface/70 backdrop-blur-sm rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 hover:bg-surface"
+                          title={wishlistIds.has(p.id) ? 'Quitar de wishlist' : 'Agregar a wishlist'}
+                        >
+                          <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: wishlistIds.has(p.id) ? "'FILL' 1" : "'FILL' 0", color: wishlistIds.has(p.id) ? '#ef4444' : undefined }}>
+                            favorite
+                          </span>
+                        </button>
+                      )}
                       {!comingSoon && (
                         <button
-                          onClick={() => addToCart({ ...p, price: `$${p.price}`, image: p.images?.[0] || '' })}
+                          onClick={e => { e.preventDefault(); addToCart({ ...p, price: `$${p.price}`, image: p.images?.[0] || '' }); }}
                           className="absolute bottom-4 right-4 w-12 h-12 bg-white text-surface rounded-full flex items-center justify-center opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-xl"
                         >
                           <span className="material-symbols-outlined">add_shopping_cart</span>
                         </button>
                       )}
-                    </div>
+                    </Link>
                     <div className={`space-y-1 ${comingSoon ? 'opacity-70 group-hover:opacity-100 transition-opacity' : ''}`}>
                       <div className="flex justify-between items-start">
                         <Link to={`/products/${p.slug || p.id}`} className="no-underline">
@@ -238,7 +255,6 @@ const ProductCatalog = () => {
                         </Link>
                         <span className="font-mono text-primary font-medium">${p.price}</span>
                       </div>
-                      <p className="text-sm text-on-surface-variant">{p.description}</p>
                       {comingSoon ? (
                         <div className="pt-4">
                           <button className="text-[10px] font-bold uppercase tracking-widest border border-primary/40 px-4 py-2 rounded hover:bg-primary hover:text-surface transition-all">Notificarme</button>
@@ -282,36 +298,6 @@ const ProductCatalog = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="mt-32 pt-12 border-t border-primary/10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="space-y-4">
-            <span className="text-primary font-headline font-bold text-xl uppercase tracking-widest italic">Trebor Labs</span>
-            <p className="font-body text-sm text-gray-400">© 2026 Trebor Labs. Technical Hardware Editorial.</p>
-          </div>
-          {[
-            {
-              title: isRaspi ? 'Pi Kits' : 'Explorar',
-              links: isRaspi
-                ? ['Starter Kits', 'NAS Server', 'IoT Bundles', 'AI Vision']
-                : ['Novedades', 'Guías de Montaje', 'Firmware QMK/VIA'],
-            },
-            { title: 'Legal', links: ['Privacy', 'Terms', 'Shipping', 'Returns'] },
-          ].map(({ title, links }) => (
-            <div key={title} className="space-y-4">
-              <p className="font-mono text-[10px] text-primary tracking-widest uppercase">{title}</p>
-              <ul className="space-y-2">{links.map(l => <li key={l}><a className="font-body text-sm text-gray-500 hover:text-primary transition-all" href="#">{l}</a></li>)}</ul>
-            </div>
-          ))}
-          <div className="space-y-4">
-            <p className="font-mono text-[10px] text-primary tracking-widest uppercase">Newsletter</p>
-            <div className="flex border-b border-outline-variant pb-2">
-              <input className="bg-transparent border-none text-xs w-full focus:outline-none placeholder:text-gray-600" placeholder="technical@tactician.com" type="email" />
-              <button className="text-primary"><span className="material-symbols-outlined">arrow_forward</span></button>
-            </div>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 };

@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // connection_limit se controla en DATABASE_URL: ?connection_limit=5&pool_timeout=10
 }
 
 enum Role {
@@ -12,23 +13,38 @@ enum Role {
   ADMIN
 }
 
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
   name          String?
   avatar        String?
   role          Role      @default(USER)
-  password      String?           // null para usuarios OAuth-only
+  password      String?
   emailVerified Boolean   @default(false)
   suspended     Boolean   @default(false)
+  phone         String?
   lastSeenAt    DateTime?
+  referralCode  String    @unique @default(dbgenerated("gen_random_uuid()"))
+  referredBy    String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-  orders   Order[]
-  posts    Post[]
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  posts         Post[]
+  addresses     Address[]
+  cart          Cart?
+  reviews       Review[]
+  comments      Comment[]
+  wishlist      Wishlist?
+  returns       Return[]
+  adminLogs     AdminLog[]
+  notifications Notification[]
+  referrals     Referral[]     @relation("Referrer")
+  referredFrom  Referral?      @relation("Referred")
 }
 
 model MagicToken {
@@ -37,25 +53,23 @@ model MagicToken {
   email     String
   userId    String?
   type      String    // "verify_email" | "reset_password" | "change_password"
-  payload   String?   // Para change_password: hash de la nueva contraseña
+  payload   String?
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
 }
 
-// Vincula un usuario con su cuenta de Google o GitHub
 model Account {
   id                String @id @default(cuid())
   userId            String
-  provider          String // "google" | "github"
-  providerAccountId String // ID del usuario en el provider
+  provider          String
+  providerAccountId String
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
-// Sesiones activas (para invalidar sesiones en logout)
 model Session {
   id        String   @id @default(cuid())
   userId    String
@@ -66,48 +80,293 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// Pedidos (userId puede ser null si el usuario compra sin cuenta)
-model Order {
+model Address {
   id        String   @id @default(cuid())
-  userId    String?
-  items     Json     // Array de { id, name, price, qty }
-  total     Float
-  status    String   @default("pending") // pending | processing | shipped | delivered | cancelled
-  address   Json?    // Dirección de envío
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String
+  fullName  String
+  phone     String
+  line1     String
+  line2     String?
+  district  String
+  city      String
+  region    String
+  isDefault Boolean  @default(false)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User? @relation(fields: [userId], references: [id])
 }
+
+// ─── Cart ─────────────────────────────────────────────────────────────────────
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+
+  @@unique([cartId, productId])
+}
+
+// ─── M2: Shipping ─────────────────────────────────────────────────────────────
+
+model ShippingZone {
+  id      String   @id @default(cuid())
+  name    String
+  regions String[]
+  price   Float
+  enabled Boolean  @default(true)
+  orders  Order[]
+}
+
+// ─── M2: Coupons ──────────────────────────────────────────────────────────────
+
+model Coupon {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  type          String    // "percent" | "fixed"
+  value         Float
+  minOrderTotal Float?
+  maxUses       Int?
+  usedCount     Int       @default(0)
+  expiresAt     DateTime?
+  enabled       Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  orders        Order[]
+  referrals     Referral[]
+}
+
+// ─── Orders ───────────────────────────────────────────────────────────────────
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  productName String
+  price       Float
+  quantity    Int
+  variantInfo Json?
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  userId          String?
+  user            User?         @relation(fields: [userId], references: [id])
+  orderItems      OrderItem[]
+  items           Json?         // legacy — migrar con scripts/migrate-order-items.js
+  subtotal        Float         @default(0)
+  shippingCost    Float         @default(0)
+  discount        Float         @default(0)
+  total           Float
+  status          String        @default("pending") // pending|processing|shipped|delivered|cancelled
+  address         Json?         // legacy
+  shippingAddress Json?
+  shippingZoneId  String?
+  shippingZone    ShippingZone? @relation(fields: [shippingZoneId], references: [id])
+  couponId        String?
+  coupon          Coupon?       @relation(fields: [couponId], references: [id])
+  paymentId       String?       // MercadoPago preference id
+  paymentStatus   String?       // "pending" | "approved" | "rejected" | "in_process"
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  return          Return?
+}
+
+// ─── Products ─────────────────────────────────────────────────────────────────
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String           @id @default(cuid())
   name        String
-  slug        String   @unique
+  slug        String           @unique
   description String?
   price       Float
-  category    String   // "keyboard" | "raspi"
-  status      String   @default("in_stock") // "in_stock" | "coming_soon" | "out_of_stock"
-  images      Json     @default("[]")   // String[] — rutas relativas /uploads/...
-  specs       Json     @default("{}")   // specs por categoría
-  featured    Boolean  @default(false)
-  stock       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  category    String
+  status      String           @default("in_stock")
+  images      Json             @default("[]")
+  afiche      String?
+  specs       Json             @default("{}")
+  featured    Boolean          @default(false)
+  stock       Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  cartItems     CartItem[]
+  variants      ProductVariant[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
 }
+
+// ─── M3: Product Variants ─────────────────────────────────────────────────────
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String  // "Color", "Layout", "Size"
+  value     String  // "Midnight Black", "75%"
+  hexColor  String?
+  available Boolean @default(true)
+}
+
+// ─── M3: Reviews ──────────────────────────────────────────────────────────────
+
+model Review {
+  id               String   @id @default(cuid())
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  rating           Int      // 1–5
+  title            String?
+  content          String
+  verifiedPurchase Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([productId, userId])
+}
+
+// ─── Blog ─────────────────────────────────────────────────────────────────────
 
 model Post {
   id          String    @id @default(cuid())
   title       String
   slug        String    @unique
-  content     String    // Markdown
+  content     String
   excerpt     String?
   coverImage  String?
   category    String?
-  status      String    @default("draft") // "draft" | "published"
+  tags        String[]  @default([])
+  status      String    @default("draft")
   authorId    String
   author      User      @relation(fields: [authorId], references: [id])
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  comments    Comment[]
+}
+
+// ─── M4: Comments ─────────────────────────────────────────────────────────────
+
+model Comment {
+  id        String    @id @default(cuid())
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  content   String
+  parentId  String?
+  parent    Comment?  @relation("Replies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("Replies")
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+}
+
+// ─── M4: Wishlist ─────────────────────────────────────────────────────────────
+
+model Wishlist {
+  id        String         @id @default(cuid())
+  userId    String         @unique
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     WishlistItem[]
+  updatedAt DateTime       @updatedAt
+}
+
+model WishlistItem {
+  id         String   @id @default(cuid())
+  wishlistId String
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  addedAt    DateTime @default(now())
+
+  @@unique([wishlistId, productId])
+}
+
+// ─── M5: Returns ──────────────────────────────────────────────────────────────
+
+model Return {
+  id            String    @id @default(cuid())
+  orderId       String    @unique
+  order         Order     @relation(fields: [orderId], references: [id])
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  reason        String
+  pickupAddress Json
+  contactPhone  String
+  status        String    @default("pending") // pending | approved | rejected | completed
+  adminNotes    String?
+  requestedAt   DateTime  @default(now())
+  resolvedAt    DateTime?
+}
+
+// ─── M5: AdminLog ─────────────────────────────────────────────────────────────
+
+model AdminLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation(fields: [adminId], references: [id])
+  action     String
+  targetType String   // "user" | "order" | "product" | "post" | "return"
+  targetId   String
+  payload    Json?
+  createdAt  DateTime @default(now())
+}
+
+// ─── M6: Referrals ────────────────────────────────────────────────────────────
+
+model Referral {
+  id         String   @id @default(cuid())
+  referrerId String
+  referrer   User     @relation("Referrer", fields: [referrerId], references: [id])
+  referredId String   @unique
+  referred   User     @relation("Referred", fields: [referredId], references: [id])
+  spinUsed   Boolean  @default(false)
+  couponId   String?
+  coupon     Coupon?  @relation(fields: [couponId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+// ─── CMS ──────────────────────────────────────────────────────────────────────
+
+model SiteConfig {
+  id        String   @id @default("main")
+  data      Json
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id      String  @id @default(cuid())
+  slug    String  @unique
+  name    String
+  icon    String?
+  enabled Boolean @default(true)
+  order   Int     @default(0)
+}
+
+// ─── M6: Notifications ────────────────────────────────────────────────────────
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String    // "spin_available" | "order_status" | "return_update" | "coupon_won"
+  title     String
+  body      String
+  payload   Json?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
 }

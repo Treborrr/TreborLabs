@@ -1,10 +1,29 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import SEOMeta from '../components/SEOMeta';
+
+const API = import.meta.env.VITE_API_URL ?? '';
 
 const Home = () => {
   const { addToCart } = useCart();
+  const [featured, setFeatured] = useState([]);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API}/api/products?featured=true&limit=3`)
+      .then(r => r.ok ? r.json() : { products: [] })
+      .then(d => setFeatured(d.products || []))
+      .catch(() => setFeatured([]))
+      .finally(() => setLoadingFeatured(false));
+  }, []);
+
   return (
     <main className="bg-surface text-on-surface">
+      <SEOMeta
+        title="Trebor Labs — Custom Keyboards & Raspberry Pi"
+        description="Teclados mecánicos personalizados y kits Raspberry Pi. Diseñados para makers y enthusiasts."
+      />
       {/* Hero Section */}
       <header className="relative w-full min-h-screen flex items-center pt-20 overflow-hidden bg-surface">
         {/* Ambient background blobs */}
@@ -82,83 +101,70 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Card 1 */}
-            <div className="group bg-surface-container-low rounded-xl p-4 transition-all hover:bg-surface-container-high hover:-translate-y-2">
-              <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-6 bg-surface-container">
-                <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVJH3hZrzVsDBx2tnw62y_sLwDWiCc7WJNT21NG9VkCHx8fbe7GI1WoixJv6pfhKNx-_P29R7odfQ4A6KByhhwRmq11WKHAsfVZmAD3G-PQR2hM196dq_OGIGZMtAal9ErPVug2jA0KfRwo86D4e3d9Sj1NqUn8lr88ed6LIYeuhE2xQFMZx4zuCuva_Iqj3mXIQ-gEyTgsxCkQzoRFCKcT7i4GxqFwRgfX7G0c5d1qD-eqE8blxv4-j3N7OU6FY4dhDXnfXYTOIeC"
-                  alt="TKL Mechanical Keyboard"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-4 right-4 px-3 py-1 bg-primary text-on-primary-fixed text-[10px] font-bold uppercase tracking-widest rounded-full">
-                  En Stock
+            {loadingFeatured ? (
+              [0, 1, 2].map(i => (
+                <div key={i} className="bg-surface-container-low rounded-xl p-4 animate-pulse">
+                  <div className="aspect-[4/3] rounded-lg bg-surface-container-high mb-6" />
+                  <div className="h-5 bg-surface-container-high rounded mb-2 w-3/4" />
+                  <div className="h-3 bg-surface-container-high rounded mb-6 w-full" />
+                  <div className="h-10 bg-surface-container-high rounded" />
                 </div>
+              ))
+            ) : featured.length === 0 ? (
+              <div className="md:col-span-3 text-center py-16">
+                <span className="material-symbols-outlined text-5xl text-on-surface-variant/20 block mb-4">inventory_2</span>
+                <p className="text-on-surface-variant text-sm font-mono">Pronto habrá productos destacados aquí.</p>
+                <Link to="/products" className="inline-block mt-4 text-primary text-sm font-mono hover:underline">Ver catálogo →</Link>
               </div>
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-headline font-bold text-xl text-on-surface">Neon Tactile 65%</h3>
-                <span className="font-mono text-primary font-bold">$189.00</span>
-              </div>
-              <p className="text-on-surface-variant text-sm mb-6">Hot-swappable, switches lubricados de fábrica.</p>
-              <button
-                onClick={() => addToCart({ id: 'home-1', name: 'Neon Tactile 65%', price: '$189' })}
-                className="w-full py-3 bg-surface-container-highest rounded-md text-on-surface text-sm font-bold hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined text-sm">shopping_bag</span>
-                Añadir al carrito
-              </button>
-            </div>
-
-            {/* Card 2 */}
-            <div className="group bg-surface-container-low rounded-xl p-4 transition-all hover:bg-surface-container-high hover:-translate-y-2">
-              <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-6 bg-surface-container">
-                <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuApuve3n0pKb9YaV-kiYU8M3yUSHpxGp2_ArAw50ea0Acpj0gcxce9xE3edHIgEdFKXtfHvUGyK8dZvr_AcmIhDOKQe19Z7oyyZNwebS-egSjiz3dNqo8poW3O6yAeitoUtBJm0-5ICKUekcum6GbdwrIhXHxL6P-sVZqbj56N7-MK_Z4UrHJvSP9WJRjtKdYy-1QWKGOCj3htjjQM3oIT7PfsCJTe70ct4D0QLNV8KRfYx7a3OdyYQQRxy6fXG76Lbswzo5FtUPNWT"
-                  alt="Raspberry Pi 5 Kit"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-4 right-4 px-3 py-1 bg-primary text-on-primary-fixed text-[10px] font-bold uppercase tracking-widest rounded-full">
-                  En Stock
-                </div>
-              </div>
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-headline font-bold text-xl text-on-surface">Pro Pi 5 Starter Kit</h3>
-                <span className="font-mono text-primary font-bold">$124.50</span>
-              </div>
-              <p className="text-on-surface-variant text-sm mb-6">8GB RAM, Caja de aluminio, Fuente 27W USB-C.</p>
-              <button
-                onClick={() => addToCart({ id: 'home-2', name: 'Pro Pi 5 Starter Kit', price: '$124' })}
-                className="w-full py-3 bg-surface-container-highest rounded-md text-on-surface text-sm font-bold hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined text-sm">shopping_bag</span>
-                Añadir al carrito
-              </button>
-            </div>
-
-            {/* Card 3 */}
-            <div className="group bg-surface-container-low rounded-xl p-4 transition-all hover:bg-surface-container-high hover:-translate-y-2">
-              <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-6 bg-surface-container">
-                <img
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhKNE3_0THQu9kkJhdNr46I-BQKSpz-UERx3L6rSKD0JS3V9WEp8NIt6hEselll9uDfJ0ajyIxpNGtOJGycfcK8W7KZFk7WQmFjnv0gDANk5bpzOZyLKfuG7MfmBds2CMmEiKvmEaJkKOrZ9RCBzIygVSbJuSLkStvLLNFNmhRfj7sqMu0gY123zYJet3pTmDOLzcWzuXH1K_G88CTaMtTYFI81EOtfZyzSkLYSWiJy5daX9JEFX-herqu2TGatfXa-wHZRGY0ObpB"
-                  alt="Coiled Aviator Cable"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-4 right-4 px-3 py-1 bg-primary text-on-primary-fixed text-[10px] font-bold uppercase tracking-widest rounded-full">
-                  En Stock
-                </div>
-              </div>
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-headline font-bold text-xl text-on-surface">Aviator Coiled Cable</h3>
-                <span className="font-mono text-primary font-bold">$45.00</span>
-              </div>
-              <p className="text-on-surface-variant text-sm mb-6">Paracord y Techflex premium, GX16 Aviator.</p>
-              <button
-                onClick={() => addToCart({ id: 'home-3', name: 'Aviator Coiled Cable', price: '$45' })}
-                className="w-full py-3 bg-surface-container-highest rounded-md text-on-surface text-sm font-bold hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined text-sm">shopping_bag</span>
-                Añadir al carrito
-              </button>
-            </div>
+            ) : (
+              featured.map(product => {
+                const img = Array.isArray(product.images) ? product.images[0] : null;
+                const imgSrc = img
+                  ? (img.startsWith('http') ? img : `${API}${img}`)
+                  : null;
+                const inStock = product.status === 'in_stock';
+                return (
+                  <div key={product.id} className="group bg-surface-container-low rounded-xl p-4 transition-all hover:bg-surface-container-high hover:-translate-y-2">
+                    <Link to={`/products/${product.id}`} className="no-underline">
+                      <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-6 bg-surface-container">
+                        {imgSrc ? (
+                          <img
+                            src={imgSrc}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="material-symbols-outlined text-on-surface-variant/20 text-5xl">inventory_2</span>
+                          </div>
+                        )}
+                        <div className={`absolute top-4 right-4 px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full ${
+                          inStock ? 'bg-primary text-on-primary-fixed' : 'bg-surface-container-highest text-on-surface-variant'
+                        }`}>
+                          {inStock ? 'En Stock' : product.status === 'coming_soon' ? 'Próximamente' : 'Agotado'}
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-headline font-bold text-xl text-on-surface">{product.name}</h3>
+                        <span className="font-mono text-primary font-bold">${Number(product.price).toFixed(2)}</span>
+                      </div>
+                      {product.description && (
+                        <p className="text-on-surface-variant text-sm mb-4 line-clamp-2">{product.description}</p>
+                      )}
+                    </Link>
+                    <button
+                      disabled={!inStock}
+                      onClick={() => addToCart({ id: product.id, name: product.name, price: product.price, image: imgSrc })}
+                      className="w-full py-3 bg-surface-container-highest rounded-md text-on-surface text-sm font-bold hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed mt-2"
+                    >
+                      <span className="material-symbols-outlined text-sm">shopping_bag</span>
+                      {inStock ? 'Añadir al carrito' : 'No disponible'}
+                    </button>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </section>
@@ -214,69 +220,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-[#131315] w-full py-12 px-8 border-t border-primary/10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 max-w-7xl mx-auto">
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 flex items-center justify-center bg-primary-container rounded">
-                <span className="text-white font-bold">;</span>
-              </div>
-              <span className="text-primary font-headline font-bold text-xl uppercase tracking-tighter">Trebor Labs</span>
-            </div>
-            <p className="font-body text-sm text-gray-400 leading-relaxed">
-              Technical Hardware Editorial. Precision tools for the modern builder.
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <h4 className="font-headline font-bold text-white text-sm uppercase tracking-widest">Navegación</h4>
-            <ul className="space-y-4">
-              {['Privacy', 'Terms', 'Shipping', 'Returns'].map((item) => (
-                <li key={item}>
-                  <a className="font-body text-sm text-gray-500 hover:text-primary underline decoration-primary underline-offset-4 transition-all" href="#">{item}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="space-y-6">
-            <h4 className="font-headline font-bold text-white text-sm uppercase tracking-widest">Catálogo</h4>
-            <ul className="space-y-4">
-              {['Keyboards', 'Raspberry Pi Kits', 'Custom Switches', 'Desktop Accessories'].map((item) => (
-                <li key={item}>
-                  <a className="text-gray-500 hover:text-primary transition-colors text-sm" href="#">{item}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="space-y-6">
-            <h4 className="font-headline font-bold text-white text-sm uppercase tracking-widest">Newsletter</h4>
-            <p className="text-sm text-gray-400">Recibe actualizaciones técnicas y lanzamientos exclusivos.</p>
-            <div className="relative">
-              <input
-                className="w-full bg-surface-container-high border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 font-mono"
-                placeholder="email@labs.com"
-                type="email"
-              />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-primary hover:bg-primary/10 rounded-md transition-all">
-                <span className="material-symbols-outlined">send</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="font-body text-sm text-gray-400">© 2026 Trebor Labs. Technical Hardware Editorial.</p>
-          <div className="flex items-center gap-8">
-            <span className="font-mono text-[10px] text-gray-600 tracking-tighter">BUILD_V1.0.0_STABLE</span>
-            <span className="font-mono text-[10px] text-gray-600 tracking-tighter flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> SYSTEM_ONLINE
-            </span>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 };

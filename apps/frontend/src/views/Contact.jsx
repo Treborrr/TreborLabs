@@ -175,37 +175,6 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-[#131315] w-full py-12 px-8 border-t border-primary/10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 max-w-7xl mx-auto">
-          <div className="space-y-4">
-            <span className="text-primary font-headline font-bold text-xl uppercase tracking-widest italic">Trebor Labs</span>
-            <p className="font-body text-sm text-gray-400">© 2026 Trebor Labs. Technical Hardware Editorial.</p>
-          </div>
-          {[
-            { title: 'Tienda', links: ['Teclados Custom', 'Raspberry Pi', 'Accesorios'] },
-            { title: 'Legal', links: ['Privacy', 'Terms', 'Shipping', 'Returns'] },
-          ].map(({ title, links }) => (
-            <div key={title} className="space-y-4">
-              <p className="font-mono text-[10px] text-primary tracking-widest uppercase">{title}</p>
-              <ul className="space-y-2">{links.map((l) => <li key={l}><a className="font-body text-sm text-gray-500 hover:text-primary transition-all" href="#">{l}</a></li>)}</ul>
-            </div>
-          ))}
-          <div className="space-y-4">
-            <p className="font-mono text-[10px] text-primary tracking-widest uppercase">Newsletter</p>
-            <div className="flex border-b border-outline-variant pb-2">
-              <input className="bg-transparent border-none text-xs w-full focus:outline-none placeholder:text-gray-600" placeholder="email@labs.com" type="email" />
-              <button className="text-primary"><span className="material-symbols-outlined">arrow_forward</span></button>
-            </div>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="font-body text-sm text-gray-400">© 2026 Trebor Labs. Technical Hardware Editorial.</p>
-          <span className="font-mono text-[10px] text-gray-600 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> SYSTEM_ONLINE
-          </span>
-        </div>
-      </footer>
     </main>
   );
 };

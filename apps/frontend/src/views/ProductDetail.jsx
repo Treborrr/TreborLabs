@@ -1,6 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import { useWishlist } from '../context/WishlistContext';
+import StarRating from '../components/StarRating';
+import { imgUrl } from '../utils/imgUrl';
+import SEOMeta from '../components/SEOMeta';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -23,26 +28,97 @@ const RASPI_SPEC_LABELS = {
 const ProductDetail = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
+  const { user, authFetch } = useAuth();
+  const { ids: wishlistIds, toggle: toggleWishlist } = useWishlist();
 
-  const [product, setProduct]   = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [notFound, setNotFound] = useState(false);
-  const [activeImg, setActiveImg] = useState(0);
+  const [product, setProduct]       = useState(null);
+  const [loading, setLoading]       = useState(true);
+  const [notFound, setNotFound]     = useState(false);
+  const [activeImg, setActiveImg]   = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+
+  // Reviews
+  const [reviews, setReviews]         = useState([]);
+  const [ratingAvg, setRatingAvg]     = useState(0);
+  const [ratingCount, setRatingCount] = useState(0);
+  const [distribution, setDistribution] = useState({});
+  const [myReview, setMyReview]       = useState(null);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewPage, setReviewPage]   = useState(1);
+  const REVIEWS_PER_PAGE = 5;
+
+  // Review form
+  const [reviewForm, setReviewForm]   = useState({ rating: 0, comment: '' });
+  const [reviewSaving, setReviewSaving] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+  const reviewFormRef = useRef(null);
 
   useEffect(() => {
     setLoading(true);
     setNotFound(false);
+    setSelectedVariant(null);
     fetch(`${API}/api/products/${id}`)
       .then(r => {
         if (r.status === 404) { setNotFound(true); return null; }
         return r.json();
       })
       .then(data => {
-        if (data?.product) setProduct(data.product);
+        if (data?.product) {
+          setProduct(data.product);
+          const variants = data.product.variants;
+          if (Array.isArray(variants) && variants.length > 0) {
+            const firstAvailable = variants.find(v => v.available !== false) || variants[0];
+            setSelectedVariant(firstAvailable);
+          }
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    setReviewsLoading(true);
+    fetch(`${API}/api/products/${id}/reviews`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data) return;
+        setReviews(data.reviews || []);
+        setRatingAvg(data.ratingAvg ?? 0);
+        setRatingCount(data.ratingCount ?? 0);
+        setDistribution(data.distribution ?? {});
+      })
+      .catch(() => {})
+      .finally(() => setReviewsLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    if (!user || !id) return;
+    authFetch(`${API}/api/products/${id}/reviews/my`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.review) setMyReview(data.review); })
+      .catch(() => {});
+  }, [user, id]);
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!reviewForm.rating) { setReviewError('Selecciona una calificación'); return; }
+    setReviewSaving(true);
+    setReviewError('');
+    try {
+      const res = await authFetch(`${API}/api/products/${id}/reviews`, {
+        method: 'POST',
+        body: JSON.stringify(reviewForm),
+      });
+      const data = await res.json();
+      if (!res.ok) { setReviewError(data.error || 'Error al enviar'); return; }
+      setMyReview(data.review);
+      setReviews(prev => [data.review, ...prev]);
+      setRatingCount(c => c + 1);
+      setReviewForm({ rating: 0, comment: '' });
+    } catch { setReviewError('Error de conexión'); }
+    finally { setReviewSaving(false); }
+  };
 
   if (loading) {
     return (
@@ -74,14 +150,19 @@ const ProductDetail = () => {
 
   return (
     <main className="pt-32 pb-24 px-4 md:px-8 max-w-screen-2xl mx-auto">
+      <SEOMeta
+        title={`${product.name} — Trebor Labs`}
+        description={product.description || `${product.name} · ${product.category === 'raspi' ? 'Raspberry Pi' : 'Teclado Custom'} disponible en Trebor Labs.`}
+        image={product.images?.[0] ? imgUrl(product.images[0]) : undefined}
+      />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         {/* Gallery */}
         <section className="lg:col-span-7 space-y-6">
           <div className="relative group">
-            <div className="aspect-[4/3] w-full bg-surface-container-low overflow-hidden rounded-xl border border-outline-variant/15">
+            <div className="aspect-square w-full bg-surface-container-low overflow-hidden rounded-xl border border-outline-variant/15">
               {images[activeImg]
                 ? <img
-                    src={images[activeImg]}
+                    src={imgUrl(images[activeImg])}
                     alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
@@ -89,7 +170,7 @@ const ProductDetail = () => {
                     <span className="material-symbols-outlined text-8xl">image</span>
                   </div>
               }
-              <div className="absolute top-4 left-4">
+              <div className="absolute top-4 right-4">
                 <span className="bg-primary/20 backdrop-blur-md text-primary px-3 py-1 text-xs font-mono tracking-widest uppercase border border-primary/30 rounded-lg">
                   {product.category === 'raspi' ? 'Raspberry Pi' : 'Custom Keyboard'} / {product.specs?.model || product.category}
                 </span>
@@ -105,7 +186,7 @@ const ProductDetail = () => {
                   className={`aspect-square bg-surface-container-high rounded-lg overflow-hidden border cursor-pointer transition-colors ${activeImg === i ? 'border-primary' : 'border-outline-variant/15 hover:border-primary/50'}`}
                 >
                   {src
-                    ? <img src={src} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
+                    ? <img src={imgUrl(src)} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
                     : <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
                         <span className="material-symbols-outlined text-sm">image</span>
                       </div>
@@ -163,13 +244,54 @@ const ProductDetail = () => {
             </div>
           )}
 
+          {/* Variants */}
+          {Array.isArray(product.variants) && product.variants.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-xs font-mono uppercase tracking-widest text-on-surface-variant">
+                Variante{selectedVariant ? `: ${selectedVariant.label}` : ''}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {product.variants.map(v => {
+                  const isSelected = selectedVariant?.id === v.id;
+                  const unavailable = v.available === false;
+                  return (
+                    <button
+                      key={v.id}
+                      onClick={() => !unavailable && setSelectedVariant(v)}
+                      title={v.label}
+                      className={`relative w-10 h-10 rounded-full border-2 transition-all ${
+                        isSelected ? 'border-primary scale-110 shadow-[0_0_10px_rgba(214,186,255,0.4)]' : 'border-outline-variant/30 hover:border-primary/50'
+                      } ${unavailable ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                      style={v.color ? { backgroundColor: v.color } : {}}
+                    >
+                      {unavailable && (
+                        <span
+                          className="absolute inset-0 rounded-full overflow-hidden"
+                          style={{ background: 'linear-gradient(135deg, transparent calc(50% - 1px), #ef4444 calc(50% - 1px), #ef4444 calc(50% + 1px), transparent calc(50% + 1px))' }}
+                        />
+                      )}
+                      {isSelected && (
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          <span className="material-symbols-outlined text-xs text-white drop-shadow-lg" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedVariant?.available === false && (
+                <p className="text-xs text-error font-mono">Esta variante no está disponible</p>
+              )}
+            </div>
+          )}
+
           {/* CTAs */}
           <div className="flex flex-col gap-4">
-            {isInStock ? (
+            {isInStock && selectedVariant?.available !== false ? (
               <>
                 <Link to="/checkout">
                   <button
-                    onClick={() => addToCart({ ...product, price: `$${product.price}`, image: product.images?.[0] || '' })}
+                    onClick={() => addToCart({ ...product, price: `$${product.price}`, image: product.images?.[0] || '', variant: selectedVariant?.label })}
                     className="group relative w-full h-14 bg-gradient-to-r from-primary-container to-[#8b6dc7] rounded-md font-headline font-bold uppercase tracking-widest text-white shadow-[0_0_20px_rgba(107,76,154,0.3)] hover:shadow-[0_0_30px_rgba(107,76,154,0.5)] transition-all active:scale-[0.98] overflow-hidden"
                   >
                     <span className="relative z-10 flex items-center justify-center gap-2">
@@ -191,46 +313,182 @@ const ProductDetail = () => {
             )}
           </div>
 
-          {/* Featured badge */}
-          {product.featured && (
-            <div className="flex items-center gap-2 text-amber-400 text-xs font-mono">
-              <span className="material-symbols-outlined text-sm">star</span>
-              Producto destacado
-            </div>
-          )}
+          {/* Wishlist + Featured */}
+          <div className="flex items-center gap-4">
+            {user && (
+              <button
+                onClick={() => toggleWishlist(product.id)}
+                className={`flex items-center gap-2 text-xs font-mono transition-colors ${wishlistIds.has(product.id) ? 'text-error' : 'text-on-surface-variant hover:text-error'}`}
+              >
+                <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: wishlistIds.has(product.id) ? "'FILL' 1" : "'FILL' 0" }}>
+                  favorite
+                </span>
+                {wishlistIds.has(product.id) ? 'En wishlist' : 'Agregar a wishlist'}
+              </button>
+            )}
+            {product.featured && (
+              <div className="flex items-center gap-2 text-amber-400 text-xs font-mono">
+                <span className="material-symbols-outlined text-sm">star</span>
+                Producto destacado
+              </div>
+            )}
+          </div>
         </section>
       </div>
 
-      {/* Footer */}
-      <footer className="mt-32 w-full py-12 border-t border-primary/10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-          <div className="space-y-4">
-            <div className="text-primary font-headline font-bold text-xl uppercase">Trebor Labs</div>
-            <p className="font-body text-sm text-gray-400 leading-relaxed">© 2026 Trebor Labs. Technical Hardware Editorial.</p>
+      {/* Afiche */}
+      {product.afiche && (
+        <section className="mt-20 flex justify-center">
+          <div className="relative w-full max-w-[768px] overflow-hidden rounded-2xl shadow-[0_0_80px_rgba(107,76,154,0.25)] border border-primary/15">
+            <img
+              src={imgUrl(product.afiche)}
+              alt={`Afiche ${product.name}`}
+              className="w-full h-auto object-cover"
+            />
           </div>
-          {[
-            { title: 'Productos', links: ['Teclados Custom', 'Kits Raspberry Pi', 'Switch Testers', 'Hardware Accs'] },
-            { title: 'Empresa',   links: ['Privacy', 'Terms', 'Shipping', 'Returns'] },
-          ].map(({ title, links }) => (
-            <div key={title} className="space-y-4">
-              <h4 className="text-white font-headline text-sm font-bold uppercase tracking-widest">{title}</h4>
-              <ul className="space-y-2 font-body text-sm text-gray-400">
-                {links.map(l => <li key={l}><a className="hover:text-primary transition-colors opacity-80 hover:opacity-100" href="#">{l}</a></li>)}
-              </ul>
+        </section>
+      )}
+
+      {/* Reviews */}
+      <section className="mt-20 space-y-8">
+        <div className="flex items-center justify-between">
+          <h2 className="font-headline font-black text-2xl tracking-tight">Reseñas</h2>
+          {ratingCount > 0 && (
+            <div className="flex items-center gap-3">
+              <StarRating value={Math.round(ratingAvg)} size="md" />
+              <span className="font-mono text-sm text-on-surface-variant">{ratingAvg.toFixed(1)} · {ratingCount} reseñas</span>
             </div>
-          ))}
-          <div className="space-y-4">
-            <h4 className="text-white font-headline text-sm font-bold uppercase tracking-widest">Newsfeed</h4>
-            <p className="text-gray-400 text-xs font-mono uppercase tracking-tighter">Unirse a la lista de tácticos:</p>
-            <div className="flex gap-2">
-              <input className="bg-surface-container border-none focus:ring-1 focus:ring-primary text-xs w-full p-2 focus:outline-none" placeholder="tu@email.com" type="email" />
-              <button className="bg-primary text-on-primary p-2 hover:bg-white transition-colors">
-                <span className="material-symbols-outlined text-sm">send</span>
-              </button>
-            </div>
-          </div>
+          )}
         </div>
-      </footer>
+
+        {ratingCount > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Distribution */}
+            <div className="lg:col-span-4 bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 space-y-3">
+              <p className="font-headline font-bold text-sm uppercase tracking-widest text-on-surface-variant mb-4">Distribución</p>
+              {[5, 4, 3, 2, 1].map(star => {
+                const count = distribution[star] ?? 0;
+                const pct = ratingCount > 0 ? (count / ratingCount) * 100 : 0;
+                return (
+                  <div key={star} className="flex items-center gap-3">
+                    <span className="font-mono text-xs text-on-surface-variant w-4">{star}</span>
+                    <span className="material-symbols-outlined text-sm text-amber-400" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <div className="flex-1 h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+                      <div className="h-full bg-amber-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="font-mono text-xs text-on-surface-variant w-6 text-right">{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Reviews list */}
+            <div className="lg:col-span-8 space-y-4">
+              {reviews.slice(0, reviewPage * REVIEWS_PER_PAGE).map(review => (
+                <div key={review.id} className="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary-container/30 flex items-center justify-center flex-shrink-0">
+                        <span className="font-bold text-xs text-primary">{(review.user?.name || 'U')[0].toUpperCase()}</span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm text-on-surface">{review.user?.name || 'Usuario'}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <StarRating value={review.rating} size="sm" />
+                          {review.verified && (
+                            <span className="flex items-center gap-1 text-[10px] font-mono text-green-400">
+                              <span className="material-symbols-outlined text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                              Compra verificada
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-xs text-on-surface-variant/60 font-mono flex-shrink-0">
+                      {new Date(review.createdAt).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+                  {review.comment && (
+                    <p className="text-sm text-on-surface-variant leading-relaxed">{review.comment}</p>
+                  )}
+                </div>
+              ))}
+              {reviews.length > reviewPage * REVIEWS_PER_PAGE && (
+                <button
+                  onClick={() => setReviewPage(p => p + 1)}
+                  className="w-full py-3 border border-outline-variant/20 rounded-xl text-xs font-mono text-on-surface-variant hover:bg-surface-container-high transition-all"
+                >
+                  Cargar más reseñas
+                </button>
+              )}
+              {reviewsLoading && (
+                <div className="flex justify-center py-8">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Write review form */}
+        {user && !myReview && (
+          <div ref={reviewFormRef} className="bg-surface-container-low rounded-xl p-8 border border-outline-variant/10 space-y-6">
+            <h3 className="font-headline font-bold text-lg">Escribir una Reseña</h3>
+            {reviewError && (
+              <div className="bg-error/10 border border-error/30 rounded-lg px-4 py-3 text-sm text-error">{reviewError}</div>
+            )}
+            <form onSubmit={handleReviewSubmit} className="space-y-5">
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-3">Tu calificación *</label>
+                <StarRating value={reviewForm.rating} max={5} onChange={v => setReviewForm(f => ({ ...f, rating: v }))} size="lg" />
+              </div>
+              <div>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Comentario (opcional)</label>
+                <textarea
+                  value={reviewForm.comment}
+                  onChange={e => setReviewForm(f => ({ ...f, comment: e.target.value }))}
+                  rows={4}
+                  placeholder="Comparte tu experiencia con este producto..."
+                  className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none resize-none"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={reviewSaving}
+                className="flex items-center gap-2 bg-primary-container text-on-primary-container px-6 py-3 rounded-lg font-headline font-bold text-xs uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-sm">rate_review</span>
+                {reviewSaving ? 'Enviando…' : 'Publicar Reseña'}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {user && myReview && (
+          <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-5 flex items-center gap-3">
+            <span className="material-symbols-outlined text-green-400" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+            <p className="text-sm text-green-400">Ya has reseñado este producto. ¡Gracias!</p>
+          </div>
+        )}
+
+        {!user && (
+          <div className="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 text-center space-y-3">
+            <p className="text-sm text-on-surface-variant">¿Compraste este producto? Inicia sesión para dejar tu reseña.</p>
+            <Link to="/login" className="inline-flex items-center gap-2 text-primary font-mono text-sm hover:underline no-underline">
+              <span className="material-symbols-outlined text-sm">login</span>
+              Iniciar sesión
+            </Link>
+          </div>
+        )}
+
+        {ratingCount === 0 && !reviewsLoading && (
+          <div className="text-center py-12 text-on-surface-variant">
+            <span className="material-symbols-outlined text-4xl mb-3 block opacity-20">reviews</span>
+            <p className="text-sm">Sé el primero en reseñar este producto.</p>
+          </div>
+        )}
+      </section>
+
     </main>
   );
 };

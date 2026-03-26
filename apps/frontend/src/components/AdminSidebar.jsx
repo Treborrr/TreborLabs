@@ -2,11 +2,23 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const sidebarLinks = [
-  { path: '/admin', label: 'Dashboard', icon: 'dashboard', exact: true },
-  { path: '/admin/products', label: 'Productos', icon: 'inventory_2' },
-  { path: '/admin/orders', label: 'Orders', icon: 'shopping_bag' },
-  { path: '/admin/blog', label: 'Blog', icon: 'article' },
-  { path: '/admin-settings', label: 'Settings', icon: 'settings' },
+  // ── Overview ──────────────────────────────
+  { path: '/admin',           label: 'Dashboard',  icon: 'dashboard',         exact: true },
+  { path: '/admin/analytics', label: 'Analytics',  icon: 'bar_chart' },
+  // ── Ventas ────────────────────────────────
+  { path: '/admin/orders',    label: 'Orders',     icon: 'shopping_bag' },
+  { path: '/admin/returns',   label: 'Returns',    icon: 'assignment_return' },
+  { path: '/admin/coupons',   label: 'Coupons',    icon: 'local_offer' },
+  { path: '/admin/shipping',  label: 'Shipping',   icon: 'local_shipping' },
+  // ── Catálogo ──────────────────────────────
+  { path: '/admin/products',  label: 'Productos',  icon: 'inventory_2' },
+  // ── Comunidad ─────────────────────────────
+  { path: '/admin/blog',      label: 'Blog',       icon: 'article' },
+  { path: '/admin/comments',  label: 'Comments',   icon: 'comment' },
+  { path: '/admin/users',     label: 'Users',      icon: 'group' },
+  // ── Sistema ───────────────────────────────
+  { path: '/admin/logs',      label: 'Logs',       icon: 'history' },
+  { path: '/admin/settings',  label: 'Settings',   icon: 'settings' },
 ];
 
 const AdminSidebar = () => {

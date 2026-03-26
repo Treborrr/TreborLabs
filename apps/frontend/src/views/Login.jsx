@@ -69,8 +69,12 @@ const Login = () => {
       <div className="relative z-10 w-full max-w-sm space-y-8">
         {/* Logo */}
         <div className="text-center space-y-2">
-          <Link to="/" className="inline-block">
-            <img src="/logo.png" alt="Trebor Labs" className="w-12 h-12 object-contain mx-auto mb-3" />
+          <Link to="/" className="inline-flex flex-col items-center gap-4 group">
+            <div className="relative w-20 h-20 group-hover:scale-110 transition-transform duration-300">
+              <img src="/logo.png" alt="Trebor Labs" className="w-full h-full object-contain relative z-10" />
+              <div className="logo-ring-base" aria-hidden="true" />
+              <div className="logo-tracer-ring" aria-hidden="true" />
+            </div>
           </Link>
           <h1 className="font-headline text-3xl font-black tracking-tighter text-on-surface">Bienvenido</h1>
           <p className="text-on-surface-variant text-sm">Inicia sesión para gestionar tus pedidos y builds.</p>

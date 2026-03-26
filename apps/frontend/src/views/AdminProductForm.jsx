@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import AdminSidebar from '../components/AdminSidebar';
+import { imgUrl } from '../utils/imgUrl';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -38,8 +38,11 @@ const AdminProductForm = () => {
   const [form, setForm] = useState({
     name: '', slug: '', category: 'keyboard', price: '', stock: '',
     status: 'in_stock', featured: false, description: '', images: [],
-    specs: {},
+    specs: {}, variants: [], afiche: null,
   });
+
+  // Variant editing state
+  const [variantDraft, setVariantDraft] = useState(null); // null | { idx: number|null, label, color, available }
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
@@ -59,7 +62,8 @@ const AdminProductForm = () => {
             name: p.name, slug: p.slug, category: p.category,
             price: p.price, stock: p.stock, status: p.status,
             featured: p.featured, description: p.description || '',
-            images: p.images || [], specs: p.specs || {},
+            images: p.images || [], specs: p.specs || {}, variants: p.variants || [],
+            afiche: p.afiche || null,
           });
         }
       } catch {
@@ -147,20 +151,15 @@ const AdminProductForm = () => {
 
   if (loading) {
     return (
-      <div className="flex bg-surface min-h-screen text-on-surface">
-        <AdminSidebar />
-        <main className="ml-64 flex-1 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </main>
-      </div>
+      <main className="flex-1 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </main>
     );
   }
 
   return (
-    <div className="flex bg-surface min-h-screen text-on-surface">
-      <AdminSidebar />
-
-      <main className="ml-64 min-h-screen bg-surface-container-low flex flex-col w-full">
+    <>
+      <main className="min-h-screen bg-surface-container-low flex flex-col w-full">
         <header className="h-20 px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
           <div>
             <h2 className="font-headline font-bold text-2xl tracking-tight">
@@ -266,7 +265,7 @@ const AdminProductForm = () => {
             <div className="flex flex-wrap gap-4">
               {form.images.map((url, i) => (
                 <div key={i} className="relative w-24 h-24 rounded-lg overflow-hidden bg-surface-container-high border border-outline-variant/20 group">
-                  <img src={url} alt="" className="w-full h-full object-cover" />
+                  <img src={imgUrl(url)} alt="" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-surface/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
                     <button type="button" onClick={() => moveImage(i, -1)} className="text-on-surface hover:text-primary">
                       <span className="material-symbols-outlined text-xs">arrow_upward</span>
@@ -340,6 +339,195 @@ const AdminProductForm = () => {
             )}
           </section>
 
+          {/* Afiche */}
+          <section className="bg-surface p-8 rounded-xl shadow-2xl space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="font-headline font-bold text-lg">Afiche del Producto</h3>
+                <p className="text-xs font-mono text-on-surface-variant mt-1">Imagen promocional vertical — recomendado 768×1276 px</p>
+              </div>
+              {form.afiche && (
+                <button
+                  type="button"
+                  onClick={() => set('afiche', null)}
+                  className="text-xs font-mono text-error hover:underline flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-sm">delete</span> Quitar
+                </button>
+              )}
+            </div>
+
+            {form.afiche ? (
+              <div className="relative w-48 rounded-xl overflow-hidden border border-outline-variant/20 shadow-xl">
+                <img src={imgUrl(form.afiche)} alt="Afiche" className="w-full h-auto object-cover" />
+              </div>
+            ) : (
+              <label className={`flex flex-col items-center justify-center w-48 h-80 rounded-xl border-2 border-dashed border-outline-variant/30 cursor-pointer hover:border-primary/50 transition-colors ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                {uploading
+                  ? <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  : <>
+                    <span className="material-symbols-outlined text-on-surface-variant text-3xl">add_photo_alternate</span>
+                    <span className="text-[10px] font-mono text-on-surface-variant mt-2 text-center px-4">Subir afiche<br/>768×1276 px</span>
+                  </>
+                }
+                <input
+                  type="file" accept="image/*" className="hidden" disabled={uploading}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploading(true);
+                    try {
+                      const token = localStorage.getItem('trebor_token');
+                      const fd = new FormData();
+                      fd.append('file', file);
+                      const res = await fetch(`${API}/api/admin/upload`, {
+                        method: 'POST',
+                        headers: token ? { Authorization: `Bearer ${token}` } : {},
+                        body: fd,
+                      });
+                      const data = await res.json();
+                      if (data.url) set('afiche', data.url);
+                      else showToast('Error al subir afiche', 'error');
+                    } catch { showToast('Error al subir afiche', 'error'); }
+                    finally { setUploading(false); }
+                  }}
+                />
+              </label>
+            )}
+          </section>
+
+          {/* Variants */}
+          <section className="bg-surface p-8 rounded-xl shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-headline font-bold text-lg">Variantes</h3>
+              {!variantDraft && (
+                <button
+                  type="button"
+                  onClick={() => setVariantDraft({ idx: null, label: '', color: '#d6baff', available: true })}
+                  className="flex items-center gap-2 bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-headline font-bold text-xs uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all"
+                >
+                  <span className="material-symbols-outlined text-sm">add</span>
+                  Agregar
+                </button>
+              )}
+            </div>
+
+            {/* Draft form */}
+            {variantDraft && (
+              <div className="bg-surface-container-low rounded-xl p-5 border border-outline-variant/15 space-y-4">
+                <h4 className="font-mono text-xs uppercase tracking-widest text-on-surface-variant">
+                  {variantDraft.idx !== null ? 'Editar variante' : 'Nueva variante'}
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nombre *</label>
+                    <input
+                      type="text"
+                      value={variantDraft.label}
+                      onChange={e => setVariantDraft(d => ({ ...d, label: e.target.value }))}
+                      placeholder="Black, Silver, Blue…"
+                      className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Color (hex)</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        value={variantDraft.color || '#d6baff'}
+                        onChange={e => setVariantDraft(d => ({ ...d, color: e.target.value }))}
+                        className="w-12 h-12 rounded-lg cursor-pointer border-none bg-transparent"
+                      />
+                      <input
+                        type="text"
+                        value={variantDraft.color || ''}
+                        onChange={e => setVariantDraft(d => ({ ...d, color: e.target.value }))}
+                        placeholder="#d6baff"
+                        className="flex-1 bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm font-mono focus:ring-1 focus:ring-primary/40 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Disponible</label>
+                    <label className="flex items-center gap-3 cursor-pointer mt-3">
+                      <div
+                        onClick={() => setVariantDraft(d => ({ ...d, available: !d.available }))}
+                        className={`w-10 h-6 rounded-full transition-colors relative ${variantDraft.available ? 'bg-primary' : 'bg-surface-container-highest'}`}
+                      >
+                        <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${variantDraft.available ? 'left-5' : 'left-1'}`} />
+                      </div>
+                      <span className="text-sm text-on-surface-variant">{variantDraft.available ? 'Sí' : 'No'}</span>
+                    </label>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!variantDraft.label.trim()) return;
+                      const entry = { id: variantDraft.id || `v_${Date.now()}`, label: variantDraft.label.trim(), color: variantDraft.color, available: variantDraft.available };
+                      if (variantDraft.idx !== null) {
+                        set('variants', form.variants.map((v, i) => i === variantDraft.idx ? entry : v));
+                      } else {
+                        set('variants', [...form.variants, entry]);
+                      }
+                      setVariantDraft(null);
+                    }}
+                    className="flex items-center gap-2 bg-primary-container text-on-primary-container px-4 py-2 rounded-lg font-headline font-bold text-xs uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all"
+                  >
+                    <span className="material-symbols-outlined text-sm">save</span>
+                    Guardar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setVariantDraft(null)}
+                    className="px-4 py-2 rounded-lg font-mono text-xs text-on-surface-variant hover:bg-surface-container-highest transition-all"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Variants list */}
+            {form.variants.length > 0 ? (
+              <div className="flex flex-wrap gap-3">
+                {form.variants.map((v, i) => (
+                  <div
+                    key={v.id || i}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${v.available !== false ? 'border-outline-variant/20 bg-surface-container-low' : 'border-outline-variant/10 bg-surface-container-low opacity-50'}`}
+                  >
+                    {v.color && (
+                      <div className="w-4 h-4 rounded-full border border-outline-variant/30 flex-shrink-0" style={{ backgroundColor: v.color }} />
+                    )}
+                    <span className="text-sm font-mono">{v.label}</span>
+                    {v.available === false && (
+                      <span className="text-[10px] font-mono text-error">agotado</span>
+                    )}
+                    <div className="flex items-center gap-0.5 ml-1">
+                      <button
+                        type="button"
+                        onClick={() => setVariantDraft({ ...v, idx: i })}
+                        className="p-1 rounded text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all"
+                      >
+                        <span className="material-symbols-outlined text-xs">edit</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => set('variants', form.variants.filter((_, idx) => idx !== i))}
+                        className="p-1 rounded text-on-surface-variant hover:text-error hover:bg-error/10 transition-all"
+                      >
+                        <span className="material-symbols-outlined text-xs">close</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-on-surface-variant/50 font-mono">Sin variantes — el producto se vende en versión única.</p>
+            )}
+          </section>
+
           {/* Actions */}
           <div className="flex gap-4">
             <button
@@ -361,7 +549,7 @@ const AdminProductForm = () => {
           {toast.msg}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

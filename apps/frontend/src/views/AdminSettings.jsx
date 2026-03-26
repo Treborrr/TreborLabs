@@ -1,66 +1,14 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-
-const sidebarLinks = [
-  { path: '/admin', label: 'Products', icon: 'inventory_2' },
-  { path: '/admin/orders', label: 'Orders', icon: 'shopping_bag' },
-  { path: '/admin/blog', label: 'Blog', icon: 'article' },
-  { path: '/admin-settings', label: 'Settings', icon: 'settings' },
-];
 
 const tabs = ['General', 'Payments', 'Shipping', 'Security', 'Integrations'];
 
 const AdminSettings = () => {
-  const location = useLocation();
   const [activeTab, setActiveTab] = useState('General');
   const [mpEnabled, setMpEnabled] = useState(true);
   const [stripeEnabled, setStripeEnabled] = useState(false);
 
   return (
-    <div className="flex bg-surface min-h-screen text-on-surface">
-      {/* Sidebar */}
-      <aside className="h-screen w-64 fixed left-0 top-0 bg-[#131315] flex flex-col border-r border-primary/15 z-50">
-        <div className="p-8">
-          <div className="flex items-center gap-1 mb-2">
-            <div className="logo-silhouette-wrapper scale-75 origin-left">
-              <img src="/logo.png" alt="Logo" className="logo-silhouette-glow" />
-            </div>
-            <h1 className="text-primary font-bold text-lg font-headline tracking-tight">Trebor Admin</h1>
-          </div>
-          <p className="font-mono text-[10px] tracking-widest text-on-surface-variant/60 uppercase">Technical Tactician</p>
-        </div>
-        <nav className="flex-1 mt-4">
-          {sidebarLinks.map((link) => {
-            const isActive = location.pathname === link.path;
-            return (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`flex items-center gap-3 px-6 py-4 transition-all no-underline ${
-                  isActive ? 'bg-primary-container/20 text-primary border-r-4 border-primary' : 'text-gray-500 hover:bg-surface-container-high hover:text-white'
-                }`}
-              >
-                <span className="material-symbols-outlined">{link.icon}</span>
-                <span className="font-mono text-xs tracking-widest">{link.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="p-6 mt-auto">
-          <div className="flex items-center gap-3 mb-6 px-2">
-            <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center">
-              <span className="text-white font-bold text-sm">R</span>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-on-surface">Trebor Labs</p>
-              <p className="text-[10px] text-on-surface-variant">System Lead</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Content */}
-      <main className="ml-64 min-h-screen bg-surface-container-low flex flex-col w-full">
+    <main className="min-h-screen bg-surface-container-low flex flex-col w-full">
         <header className="h-20 px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
           <div>
             <h2 className="font-headline font-bold text-2xl text-on-surface tracking-tight">System Settings</h2>
@@ -218,8 +166,7 @@ const AdminSettings = () => {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   );
 };
 

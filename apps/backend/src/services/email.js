@@ -97,3 +97,100 @@ export async function sendChangePasswordConfirmEmail(email, token) {
     `),
   });
 }
+
+// ── Order emails ──────────────────────────────────────────────────────────────
+
+const statusLabels = {
+  pending:    'Pedido recibido',
+  processing: 'En preparación',
+  shipped:    'Enviado',
+  delivered:  'Entregado',
+  cancelled:  'Cancelado',
+};
+
+const statusColors = {
+  pending:    '#a0a0a0',
+  processing: '#d6baff',
+  shipped:    '#60a5fa',
+  delivered:  '#4ade80',
+  cancelled:  '#f87171',
+};
+
+function itemsTable(orderItems = []) {
+  const rows = orderItems.map(i =>
+    `<tr>
+       <td style="padding:8px 0;color:rgba(255,255,255,0.75);font-size:13px;border-bottom:1px solid rgba(255,255,255,0.08);">${i.productName}</td>
+       <td style="padding:8px 0;text-align:center;color:rgba(255,255,255,0.5);font-size:12px;border-bottom:1px solid rgba(255,255,255,0.08);">x${i.quantity}</td>
+       <td style="padding:8px 0;text-align:right;color:#d6baff;font-size:13px;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.08);">$${(i.price * i.quantity).toFixed(2)}</td>
+     </tr>`
+  ).join('');
+  return `<table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">${rows}</table>`;
+}
+
+function totalsBlock(order) {
+  const lines = [
+    ['Subtotal',      `$${Number(order.subtotal || 0).toFixed(2)}`],
+    ['Envío',         `$${Number(order.shippingCost || 0).toFixed(2)}`],
+  ];
+  if (order.discount > 0) {
+    lines.push(['Descuento', `-$${Number(order.discount).toFixed(2)}`]);
+  }
+  const rows = lines.map(([label, val]) =>
+    `<tr>
+       <td style="padding:4px 0;color:rgba(255,255,255,0.5);font-size:12px;">${label}</td>
+       <td style="padding:4px 0;text-align:right;color:rgba(255,255,255,0.5);font-size:12px;">${val}</td>
+     </tr>`
+  ).join('');
+  return `
+    <table width="100%" cellpadding="0" cellspacing="0">
+      ${rows}
+      <tr>
+        <td style="padding:10px 0 0;color:#fff;font-size:16px;font-weight:900;border-top:1px solid rgba(214,186,255,0.2);">Total</td>
+        <td style="padding:10px 0 0;text-align:right;color:#d6baff;font-size:18px;font-weight:900;border-top:1px solid rgba(214,186,255,0.2);">$${Number(order.total).toFixed(2)}</td>
+      </tr>
+    </table>`;
+}
+
+export async function sendOrderConfirmationEmail(email, order, shippingAddress) {
+  const orderId = order.id.slice(-8).toUpperCase();
+  const addr = shippingAddress ?? order.shippingAddress ?? {};
+  await send({
+    to: email,
+    subject: `Pedido confirmado #${orderId} — Trebor Labs`,
+    html: wrap(`
+      ${h1('Pedido recibido')}
+      ${p(`Gracias por tu compra. Hemos recibido tu pedido y lo estamos procesando.`)}
+      <div style="margin:20px 0;padding:12px 16px;background:rgba(214,186,255,0.08);border-radius:6px;border-left:3px solid #d6baff;">
+        <p style="color:#d6baff;font-size:12px;font-family:monospace;margin:0;letter-spacing:1px;">PEDIDO #${orderId}</p>
+      </div>
+      ${itemsTable(order.orderItems || [])}
+      ${totalsBlock(order)}
+      ${addr.fullName ? `<div style="margin-top:24px;">${p(`<strong style="color:#fff;">Envío a:</strong> ${addr.fullName}, ${addr.line1}, ${addr.district}, ${addr.city}`)}</div>` : ''}
+      ${btn(`${FRONTEND_URL}/orders/${order.id}`, 'Ver mi pedido')}
+      ${sm('Recibirás otro correo cuando tu pedido sea enviado.')}
+    `),
+  });
+}
+
+export async function sendOrderStatusUpdateEmail(email, order, previousStatus) {
+  const orderId = order.id.slice(-8).toUpperCase();
+  const label   = statusLabels[order.status] || order.status;
+  const color   = statusColors[order.status] || '#d6baff';
+
+  await send({
+    to: email,
+    subject: `Pedido #${orderId}: ${label} — Trebor Labs`,
+    html: wrap(`
+      ${h1(`Actualización de pedido`)}
+      <div style="margin:20px 0;padding:14px 16px;background:rgba(214,186,255,0.08);border-radius:6px;">
+        <p style="color:#d6baff;font-size:12px;font-family:monospace;margin:0 0 8px;letter-spacing:1px;">PEDIDO #${orderId}</p>
+        <p style="margin:0;font-size:18px;font-weight:900;color:${color};">● ${label}</p>
+      </div>
+      ${order.status === 'shipped' ? p('Tu pedido está en camino. Puedes hacer seguimiento desde tu perfil.') : ''}
+      ${order.status === 'delivered' ? p('¡Tu pedido fue entregado! Esperamos que disfrutes tu compra.') : ''}
+      ${order.status === 'cancelled' ? p('Tu pedido ha sido cancelado. Si tienes dudas, contáctanos.') : ''}
+      ${order.notes ? `<div style="margin:16px 0;">${p(`Nota: ${order.notes}`)}</div>` : ''}
+      ${btn(`${FRONTEND_URL}/orders/${order.id}`, 'Ver detalles del pedido')}
+    `),
+  });
+}

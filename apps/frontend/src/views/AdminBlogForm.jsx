@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
 import { useAuth } from '../context/AuthContext';
-import AdminSidebar from '../components/AdminSidebar';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 const LS_KEY = 'trebor_blog_draft';
@@ -136,20 +135,15 @@ const AdminBlogForm = () => {
 
   if (loading) {
     return (
-      <div className="flex bg-surface min-h-screen">
-        <AdminSidebar />
-        <main className="ml-64 flex-1 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </main>
-      </div>
+      <main className="flex-1 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </main>
     );
   }
 
   return (
-    <div className="flex bg-surface min-h-screen text-on-surface">
-      <AdminSidebar />
-
-      <main className="ml-64 min-h-screen bg-surface-container-low flex flex-col w-full">
+    <>
+      <main className="min-h-screen bg-surface-container-low flex flex-col w-full">
         <header className="h-20 px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
           <div>
             <h2 className="font-headline font-bold text-2xl tracking-tight">
@@ -311,7 +305,7 @@ const AdminBlogForm = () => {
           {toast.msg}
         </div>
       )}
-    </div>
+    </>
   );
 };
 

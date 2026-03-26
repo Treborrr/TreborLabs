@@ -41,8 +41,8 @@ async function consumeToken(prisma, token, type) {
   return record;
 }
 
-const RATE_AUTH  = { max: 8,  timeWindow: '15 minutes' };
-const RATE_TIGHT = { max: 5,  timeWindow: '15 minutes' };
+const RATE_AUTH  = { max: 5,  timeWindow: '15 minutes' };
+const RATE_TIGHT = { max: 3,  timeWindow: '15 minutes' };
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 
@@ -50,7 +50,7 @@ export default async function authEmailRoutes(fastify) {
 
   // POST /api/auth/register
   fastify.post('/api/auth/register', { config: { rateLimit: RATE_TIGHT } }, async (request, reply) => {
-    const { email, password, name } = request.body ?? {};
+    const { email, password, name, ref } = request.body ?? {};
     if (!email || !password || !name) {
       return reply.code(400).send({ error: 'Nombre, email y contraseña son requeridos' });
     }
@@ -64,10 +64,35 @@ export default async function authEmailRoutes(fastify) {
       return reply.code(409).send({ error: 'Ya existe una cuenta con ese correo' });
     }
 
+    // Validar código de referido si viene
+    let referrer = null;
+    if (ref) {
+      referrer = await fastify.prisma.user.findUnique({
+        where:  { referralCode: ref },
+        select: { id: true },
+      });
+    }
+
     const hashedPw = await bcrypt.hash(password, SALT_ROUNDS);
     const user = await fastify.prisma.user.create({
-      data: { email, name, password: hashedPw, emailVerified: false },
+      data: { email, name, password: hashedPw, emailVerified: false, referredBy: referrer?.id ?? null },
     });
+
+    // Crear registro de referido y notificar al referidor
+    if (referrer) {
+      await fastify.prisma.referral.create({
+        data: { referrerId: referrer.id, referredId: user.id },
+      }).catch(() => {});
+      await fastify.prisma.notification.create({
+        data: {
+          userId:  referrer.id,
+          type:    'spin_available',
+          title:   '¡Nuevo referido!',
+          body:    `${name} se registró con tu enlace. ¡Tienes una ruleta disponible!`,
+          payload: { referredUserId: user.id },
+        },
+      }).catch(() => {});
+    }
 
     const mt = await createMagicToken(fastify.prisma, {
       email, userId: user.id, type: 'verify_email',

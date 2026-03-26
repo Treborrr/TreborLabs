@@ -16,4 +16,4 @@ COPY src ./src/
 EXPOSE 3001
 
 # At startup: regenerate client (in case schema changed), push DB schema, then start with hot reload
-CMD ["sh", "-c", "npx prisma generate && npx prisma db push && node --watch src/index.js"]
+CMD ["sh", "-c", "npx prisma generate && npx prisma db push --accept-data-loss && node --watch src/index.js"]

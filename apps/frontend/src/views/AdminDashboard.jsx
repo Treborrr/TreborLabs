@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import AdminSidebar from '../components/AdminSidebar';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -43,10 +42,7 @@ const AdminDashboard = () => {
     n != null ? `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—';
 
   return (
-    <div className="flex bg-surface min-h-screen text-on-surface">
-      <AdminSidebar />
-
-      <main className="ml-64 min-h-screen bg-surface-container-low flex flex-col w-full">
+    <main className="min-h-screen bg-surface-container-low flex flex-col w-full">
         {/* Top Bar */}
         <header className="h-20 px-10 flex items-center justify-between bg-surface/50 backdrop-blur-md sticky top-0 z-40">
           <div>
@@ -190,8 +186,7 @@ const AdminDashboard = () => {
             </>
           )}
         </div>
-      </main>
-    </div>
+    </main>
   );
 };
 

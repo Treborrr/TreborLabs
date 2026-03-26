@@ -1,20 +1,20 @@
-version: '3.8'
-
 services:
 
   # ─── Base de datos ─────────────────────────────────────────────────────────
+  # Las credenciales se leen de docker/.env si existe, o usan los defaults.
+  # Para sobreescribir, crea docker/.env con POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB.
   postgres:
     image: postgres:16-alpine
     container_name: treborlabs_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: trebor
-      POSTGRES_PASSWORD: trebor_secret
-      POSTGRES_DB: treborlabs
+      POSTGRES_USER: ${POSTGRES_USER:-trebor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trebor_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-treborlabs}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U trebor -d treborlabs"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trebor} -d ${POSTGRES_DB:-treborlabs}"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -30,7 +30,7 @@ services:
       - ../apps/backend/.env
     environment:
       # Sobreescribir solo lo que cambia dentro de Docker
-      DATABASE_URL: postgresql://trebor:trebor_secret@postgres:5432/treborlabs
+      DATABASE_URL: postgresql://${POSTGRES_USER:-trebor}:${POSTGRES_PASSWORD:-trebor_secret}@postgres:5432/${POSTGRES_DB:-treborlabs}
       PORT: 3001
       BACKEND_URL: http://localhost:3001
       FRONTEND_URL: http://localhost:5173
