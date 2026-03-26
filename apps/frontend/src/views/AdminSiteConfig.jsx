@@ -56,7 +56,7 @@ const AdminSiteConfig = () => {
     data.append('file', file);
 
     try {
-      const res = await authFetch(`${API}/admin/upload`, {
+      const res = await authFetch(`${API}/api/admin/upload`, {
         method: 'POST',
         body: data,
       });
@@ -83,7 +83,7 @@ const AdminSiteConfig = () => {
     setSaving(true);
     setMsg({ type: '', text: '' });
     try {
-      await authFetch(`${API}/admin/site-config`, {
+      await authFetch(`${API}/api/admin/site-config`, {
         method: 'PUT',
         body: JSON.stringify(formData),
       });

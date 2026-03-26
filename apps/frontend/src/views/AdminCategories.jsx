@@ -13,7 +13,7 @@ const AdminCategories = () => {
   const loadCategories = async () => {
     setLoading(true);
     try {
-      const res = await authFetch(`${API}/admin/categories`);
+      const res = await authFetch(`${API}/api/admin/categories`);
       const data = await res.json();
       setCategories(data);
     } catch (err) {
@@ -34,7 +34,7 @@ const AdminCategories = () => {
     setMsg({ type: '', text: '' });
     try {
       const orderParsed = parseInt(newCat.order, 10) || 0;
-      await authFetch(`${API}/admin/categories`, {
+      await authFetch(`${API}/api/admin/categories`, {
         method: 'POST',
         body: JSON.stringify({ ...newCat, order: orderParsed }),
       });
@@ -52,7 +52,7 @@ const AdminCategories = () => {
 
   const handleToggle = async (id, currentEnabled) => {
     try {
-      await authFetch(`${API}/admin/categories/${id}`, {
+      await authFetch(`${API}/api/admin/categories/${id}`, {
         method: 'PATCH',
         body: JSON.stringify({ enabled: !currentEnabled }),
       });
@@ -66,7 +66,7 @@ const AdminCategories = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar esta categoría? Si tiene productos, fallará.")) return;
     try {
-      await authFetch(`${API}/admin/categories/${id}`, {
+      await authFetch(`${API}/api/admin/categories/${id}`, {
         method: 'DELETE',
       });
       setMsg({ type: 'success', text: 'Categoría eliminada' });
