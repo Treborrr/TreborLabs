@@ -65,21 +65,23 @@ const Home = () => {
               {hero.subtitle}
             </p>
 
-            <div className="flex flex-wrap gap-4">
-              {hero.ctaPrimary && hero.ctaPrimaryLink && (
-                <Link to={hero.ctaPrimaryLink}>
-                  <button className="px-8 py-4 bg-primary-container text-on-primary-container rounded-md font-bold tracking-tight hover:shadow-[0_0_20px_rgba(107,76,154,0.4)] transition-all active:scale-95">
-                    {hero.ctaPrimary}
-                  </button>
-                </Link>
-              )}
-              {hero.ctaSecondary && hero.ctaSecondaryLink && (
-                <Link to={hero.ctaSecondaryLink}>
-                  <button className="px-8 py-4 bg-secondary-container text-on-secondary-container rounded-md font-bold tracking-tight border border-secondary/20 hover:bg-secondary/10 transition-all active:scale-95">
-                    {hero.ctaSecondary}
-                  </button>
-                </Link>
-              )}
+            <div className="flex flex-wrap gap-4 pt-4">
+              <Link to="/products" className="no-underline">
+                <button className="group relative flex items-center gap-3 px-8 py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold text-xs uppercase tracking-widest rounded-md overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(214,186,255,0.4)] active:scale-95">
+                  <span className="relative z-10 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-sm">shopping_cart</span>
+                    Explorar Tienda
+                  </span>
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                </button>
+              </Link>
+
+              <Link to="/about" className="no-underline">
+                <button className="flex items-center gap-3 px-8 py-4 bg-surface/10 backdrop-blur-md border border-primary/30 text-primary font-headline font-bold text-xs uppercase tracking-widest rounded-md transition-all hover:bg-primary/10 hover:border-primary active:scale-95">
+                  <span className="material-symbols-outlined text-sm">info</span>
+                  Nuestra Historia
+                </button>
+              </Link>
             </div>
           </div>
 
