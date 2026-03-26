@@ -222,14 +222,85 @@ const AdminSiteConfig = () => {
 
               <div className="md:col-span-2 border-t border-outline-variant/10 pt-6 mt-4">
                 <h3 className="text-sm font-bold mb-4 font-headline text-on-surface flex items-center gap-2"><span className="material-symbols-outlined text-[18px]">style</span> Spec Card Flotante</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface-container border border-outline-variant/30 p-5 rounded-lg">
-                  <div>
-                    <label className="block text-[10px] font-mono tracking-widest text-on-surface-variant uppercase mb-1">Atributo 1</label>
-                    <input type="text" value={formData.hero?.specCard?.switches || ''} onChange={(e) => handleHeroSpecChange('switches', e.target.value)} className="w-full bg-surface-container-high border-none p-2.5 rounded text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" placeholder="Ej: Gateron Milky Yellow Pro" />
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_180px] gap-4">
+                  {/* Controls */}
+                  <div className="bg-surface-container border border-outline-variant/30 p-5 rounded-lg space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-mono tracking-widest text-on-surface-variant uppercase mb-1">Atributo 1</label>
+                        <input type="text" value={formData.hero?.specCard?.switches || ''} onChange={(e) => handleHeroSpecChange('switches', e.target.value)} className="w-full bg-surface-container-high border-none p-2.5 rounded text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" placeholder="Ej: Gateron Milky Yellow Pro" />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono tracking-widest text-on-surface-variant uppercase mb-1">Atributo 2</label>
+                        <input type="text" value={formData.hero?.specCard?.keycaps || ''} onChange={(e) => handleHeroSpecChange('keycaps', e.target.value)} className="w-full bg-surface-container-high border-none p-2.5 rounded text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" placeholder="Ej: PBT Double Shot" />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-[10px] font-mono tracking-widest text-on-surface-variant uppercase">Posición Vertical</label>
+                        <span className="text-[10px] font-mono text-primary font-bold">{formData.hero?.specCard?.offsetY ?? 75}%</span>
+                      </div>
+                      <input
+                        type="range" min="5" max="95"
+                        value={formData.hero?.specCard?.offsetY ?? 75}
+                        onChange={(e) => handleHeroSpecChange('offsetY', Number(e.target.value))}
+                        className="w-full accent-primary cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[9px] font-mono text-on-surface-variant/40 mt-1">
+                        <span>Arriba</span><span>Abajo</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono tracking-widest text-on-surface-variant uppercase mb-2">Tamaño</label>
+                      <div className="flex gap-2">
+                        {[{ id: 'sm', label: 'S — Compacto' }, { id: 'md', label: 'M — Normal' }, { id: 'lg', label: 'L — Grande' }].map(({ id, label }) => (
+                          <button
+                            key={id} type="button"
+                            onClick={() => handleHeroSpecChange('size', id)}
+                            className={`flex-1 py-2 rounded-md text-[10px] font-mono font-bold border transition-colors cursor-pointer ${
+                              (formData.hero?.specCard?.size || 'md') === id
+                                ? 'bg-primary text-on-primary border-primary'
+                                : 'bg-transparent text-on-surface-variant border-outline-variant/30 hover:border-primary/40'
+                            }`}
+                          >{label}</button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-[10px] font-mono tracking-widest text-on-surface-variant uppercase mb-1">Atributo 2</label>
-                    <input type="text" value={formData.hero?.specCard?.keycaps || ''} onChange={(e) => handleHeroSpecChange('keycaps', e.target.value)} className="w-full bg-surface-container-high border-none p-2.5 rounded text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" placeholder="Ej: PBT Double Shot" />
+
+                  {/* Live Preview */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[10px] font-mono tracking-widest text-on-surface-variant uppercase">Vista Previa</span>
+                    <div className="bg-surface-container-high rounded-lg flex-1 flex items-center justify-center p-4 min-h-[200px]">
+                      <div className="relative" style={{ width: '80px', height: '160px' }}>
+                        <div className="absolute inset-0 rounded-lg overflow-hidden bg-surface-container flex items-center justify-center border border-outline-variant/20">
+                          {formData.hero.image ? (
+                            <img
+                              src={formData.hero.image.startsWith('http') ? formData.hero.image : `${API || ''}${formData.hero.image}`}
+                              className="w-full h-full object-contain opacity-50"
+                            />
+                          ) : (
+                            <span className="material-symbols-outlined text-on-surface-variant/20 text-3xl">keyboard</span>
+                          )}
+                        </div>
+                        {(formData.hero?.specCard?.switches || formData.hero?.specCard?.keycaps) && (
+                          <div
+                            className="absolute z-10"
+                            style={{ top: `${formData.hero?.specCard?.offsetY ?? 75}%`, transform: 'translateY(-50%)', left: '-36px' }}
+                          >
+                            <div className={`bg-surface-container-highest rounded-lg shadow-xl border border-outline-variant/30 ${
+                              (formData.hero?.specCard?.size || 'md') === 'sm' ? 'p-1.5' :
+                              (formData.hero?.specCard?.size || 'md') === 'lg' ? 'p-3' : 'p-2'
+                            }`}>
+                              <span className="font-mono text-[6px] text-primary block mb-0.5 tracking-wider uppercase">Spec</span>
+                              {[formData.hero?.specCard?.switches, formData.hero?.specCard?.keycaps].filter(Boolean).map((v, i) => (
+                                <p key={i} className="font-headline font-bold text-[7px] text-on-surface leading-tight max-w-[72px] truncate">{v}</p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

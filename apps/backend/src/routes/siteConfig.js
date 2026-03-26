@@ -16,7 +16,9 @@ const defaultSiteConfig = {
     },
     specCard: {
       switches: "Gateron Milky Yellow Pro",
-      keycaps: "PBT Double Shot"
+      keycaps: "PBT Double Shot",
+      offsetY: 75,
+      size: 'md'
     }
   },
   about: {

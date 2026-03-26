@@ -166,14 +166,25 @@ const Home = () => {
               loading="eager"
             />
 
-            {hero.specCard && Object.keys(hero.specCard).length > 0 && (
-              <div className="absolute -bottom-8 -left-8 p-6 bg-surface-container-highest rounded-xl shadow-xl max-w-[200px] border border-outline-variant/30">
-                <span className="font-mono text-[10px] text-primary block mb-2 tracking-widest uppercase">Spec Highlights</span>
-                {Object.values(hero.specCard).map((val, idx) => (
-                  <p key={idx} className="font-headline font-bold text-sm text-on-surface">{val}</p>
-                ))}
-              </div>
-            )}
+            {(() => {
+              if (!hero.specCard) return null;
+              const LAYOUT_KEYS = ['offsetY', 'size'];
+              const entries = Object.entries(hero.specCard).filter(([k, v]) => !LAYOUT_KEYS.includes(k) && v);
+              if (entries.length === 0) return null;
+              const offsetY = hero.specCard.offsetY ?? 75;
+              const size = hero.specCard.size || 'md';
+              const sc = { sm: { pad: 'p-3', maxW: 'max-w-[150px]', text: 'text-xs' }, md: { pad: 'p-5', maxW: 'max-w-[200px]', text: 'text-sm' }, lg: { pad: 'p-6', maxW: 'max-w-[240px]', text: 'text-base' } }[size] || { pad: 'p-5', maxW: 'max-w-[200px]', text: 'text-sm' };
+              return (
+                <div className="absolute -left-8 z-10" style={{ top: `${offsetY}%`, transform: 'translateY(-50%)' }}>
+                  <div className={`${sc.pad} ${sc.maxW} bg-surface-container-highest rounded-xl shadow-xl border border-outline-variant/30`}>
+                    <span className="font-mono text-[10px] text-primary block mb-2 tracking-widest uppercase">Spec Highlights</span>
+                    {entries.map(([, val], idx) => (
+                      <p key={idx} className={`font-headline font-bold ${sc.text} text-on-surface`}>{val}</p>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </header>
