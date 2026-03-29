@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import InfoTooltip from '../components/InfoTooltip';
+import { ORDER_DETAIL_TOOLTIPS } from '../constants/adminTooltips';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -139,7 +141,7 @@ const AdminOrderDetail = () => {
             <section className="bg-surface rounded-xl shadow-2xl p-6 space-y-4">
               <h3 className="font-headline font-bold text-sm uppercase tracking-widest text-on-surface-variant">Actualizar Pedido</h3>
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Estado</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Estado<InfoTooltip text={ORDER_DETAIL_TOOLTIPS.statusSelect} /></label>
                 <select value={status} onChange={e => setStatus(e.target.value)}
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none">
                   {STATUSES.map(s => (
@@ -148,7 +150,7 @@ const AdminOrderDetail = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nota interna</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nota interna<InfoTooltip text={ORDER_DETAIL_TOOLTIPS.internalNotes} /></label>
                 <textarea value={note} onChange={e => setNote(e.target.value)} rows={3}
                   placeholder="Número de tracking, observaciones..."
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none resize-none" />

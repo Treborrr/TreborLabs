@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import InfoTooltip from '../components/InfoTooltip';
+import { CATEGORY_TOOLTIPS } from '../constants/adminTooltips';
 
 const AdminCategories = () => {
   const { authFetch, API } = useAuth();
@@ -116,19 +118,19 @@ const AdminCategories = () => {
               <form onSubmit={handleCreate}>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                   <div>
-                    <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Nombre</label>
+                    <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Nombre<InfoTooltip text={CATEGORY_TOOLTIPS.name} /></label>
                     <input type="text" required value={newCat.name} onChange={e => Object.assign(newCat, { name: e.target.value }) && setNewCat({ ...newCat, slug: e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-') })} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" placeholder="Ej: Switches" />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Slug</label>
+                    <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Slug<InfoTooltip text={CATEGORY_TOOLTIPS.slug} /></label>
                     <input type="text" required value={newCat.slug} onChange={e => setNewCat({ ...newCat, slug: e.target.value })} placeholder="ej-teclados" className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" pattern="[a-z0-9-]+" title="Solo minúsculas, números y guiones" />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Ícono</label>
+                    <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Ícono<InfoTooltip text={CATEGORY_TOOLTIPS.icon} /></label>
                     <input type="text" value={newCat.icon} onChange={e => setNewCat({ ...newCat, icon: e.target.value })} placeholder="keyboard" className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Orden</label>
+                    <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Orden<InfoTooltip text={CATEGORY_TOOLTIPS.order} /></label>
                     <input type="number" required value={newCat.order} onChange={e => setNewCat({ ...newCat, order: e.target.value })} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
                   </div>
                 </div>
@@ -159,7 +161,7 @@ const AdminCategories = () => {
                       <th className="text-left pb-4 text-[10px] font-mono tracking-widest text-on-surface-variant uppercase pr-4">Categoría</th>
                       <th className="text-left pb-4 text-[10px] font-mono tracking-widest text-on-surface-variant uppercase pr-4">Slug (URL)</th>
                       <th className="text-left pb-4 text-[10px] font-mono tracking-widest text-on-surface-variant uppercase pr-4">Orden</th>
-                      <th className="text-left pb-4 text-[10px] font-mono tracking-widest text-on-surface-variant uppercase pr-4">Estado</th>
+                      <th className="text-left pb-4 text-[10px] font-mono tracking-widest text-on-surface-variant uppercase pr-4">Estado<InfoTooltip text={CATEGORY_TOOLTIPS.enabled} /></th>
                       <th className="text-right pb-4 text-[10px] font-mono tracking-widest text-on-surface-variant uppercase pr-4">Acciones</th>
                     </tr>
                   </thead>

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import InfoTooltip from '../components/InfoTooltip';
+import { COMMENT_TOOLTIPS } from '../constants/adminTooltips';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -49,14 +51,17 @@ const AdminComments = () => {
             <h2 className="font-headline font-bold text-2xl tracking-tight">Comentarios</h2>
             <p className="text-xs font-mono text-on-surface-variant">/root/admin/comments</p>
           </div>
-          <div className="relative flex items-center bg-surface-container-high rounded-lg overflow-hidden focus-within:ring-1 ring-primary/40">
-            <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-sm">search</span>
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar por usuario, post o contenido..."
-              className="bg-transparent border-none py-2.5 pl-10 pr-4 text-sm text-on-surface focus:ring-0 focus:outline-none w-72 placeholder:text-on-surface-variant/50"
-            />
+          <div className="relative flex items-center gap-1">
+            <div className="relative flex items-center bg-surface-container-high rounded-lg overflow-hidden focus-within:ring-1 ring-primary/40">
+              <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-sm">search</span>
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Buscar por usuario, post o contenido..."
+                className="bg-transparent border-none py-2.5 pl-10 pr-4 text-sm text-on-surface focus:ring-0 focus:outline-none w-72 placeholder:text-on-surface-variant/50"
+              />
+            </div>
+            <InfoTooltip text={COMMENT_TOOLTIPS.search} />
           </div>
         </header>
 

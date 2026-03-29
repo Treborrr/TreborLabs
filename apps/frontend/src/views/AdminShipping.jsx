@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import InfoTooltip from '../components/InfoTooltip';
+import { SHIPPING_TOOLTIPS } from '../constants/adminTooltips';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -107,7 +109,7 @@ const AdminShipping = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nombre *</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nombre *<InfoTooltip text={SHIPPING_TOOLTIPS.zoneName} /></label>
                     <input
                       type="text" required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                       placeholder="Lima Metropolitana"
@@ -115,7 +117,7 @@ const AdminShipping = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Precio (USD) *</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Precio (USD) *<InfoTooltip text={SHIPPING_TOOLTIPS.zonePrice} /></label>
                     <input
                       type="number" required min="0" step="0.01" value={form.price}
                       onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
@@ -125,7 +127,7 @@ const AdminShipping = () => {
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">
-                      Regiones cubiertas <span className="normal-case text-on-surface-variant/60">(separadas por coma)</span>
+                      Regiones cubiertas <span className="normal-case text-on-surface-variant/60">(separadas por coma)</span><InfoTooltip text={SHIPPING_TOOLTIPS.regions} />
                     </label>
                     <input
                       type="text" value={form.regions}
@@ -138,7 +140,7 @@ const AdminShipping = () => {
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input type="checkbox" checked={!!form.enabled} onChange={e => setForm(f => ({ ...f, enabled: e.target.checked }))}
                     className="w-4 h-4 accent-primary rounded" />
-                  <span className="text-sm text-on-surface-variant">Zona habilitada</span>
+                  <span className="text-sm text-on-surface-variant">Zona habilitada<InfoTooltip text={SHIPPING_TOOLTIPS.zoneEnabled} /></span>
                 </label>
                 <div className="flex gap-3 pt-2">
                   <button type="submit" disabled={saving}

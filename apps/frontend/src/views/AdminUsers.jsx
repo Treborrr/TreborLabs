@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import InfoTooltip from '../components/InfoTooltip';
+import { USER_TOOLTIPS } from '../constants/adminTooltips';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -74,14 +76,17 @@ const AdminUsers = () => {
             <p className="text-xs font-mono text-on-surface-variant">/root/admin/users</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="relative flex items-center bg-surface-container-high rounded-lg overflow-hidden focus-within:ring-1 ring-primary/40">
-              <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-sm">search</span>
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Buscar usuario..."
-                className="bg-transparent border-none py-2.5 pl-10 pr-4 text-sm focus:ring-0 focus:outline-none w-56 placeholder:text-on-surface-variant/50"
-              />
+            <div className="relative flex items-center gap-1">
+              <div className="relative flex items-center bg-surface-container-high rounded-lg overflow-hidden focus-within:ring-1 ring-primary/40">
+                <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-sm">search</span>
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Buscar usuario..."
+                  className="bg-transparent border-none py-2.5 pl-10 pr-4 text-sm focus:ring-0 focus:outline-none w-56 placeholder:text-on-surface-variant/50"
+                />
+              </div>
+              <InfoTooltip text={USER_TOOLTIPS.search} />
             </div>
             <div className="flex gap-1 p-1 bg-surface-container rounded-xl border border-outline-variant/10">
               {ROLES.map(r => (
@@ -114,7 +119,11 @@ const AdminUsers = () => {
                   <thead>
                     <tr className="border-b border-outline-variant/10 bg-surface-container">
                       {['Usuario', 'Email', 'Rol', 'Estado', 'Acciones'].map(h => (
-                        <th key={h} className="px-5 py-3 text-left text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">{h}</th>
+                        <th key={h} className="px-5 py-3 text-left text-[10px] font-mono uppercase tracking-widest text-on-surface-variant">
+                          {h}
+                          {h === 'Rol' && <InfoTooltip text={USER_TOOLTIPS.roleFilter} />}
+                          {h === 'Estado' && <InfoTooltip text={USER_TOOLTIPS.suspend} />}
+                        </th>
                       ))}
                     </tr>
                   </thead>

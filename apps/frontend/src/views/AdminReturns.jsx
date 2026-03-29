@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import InfoTooltip from '../components/InfoTooltip';
+import { RETURN_TOOLTIPS } from '../constants/adminTooltips';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -62,13 +64,16 @@ const AdminReturns = () => {
             <h2 className="font-headline font-bold text-2xl tracking-tight">Devoluciones</h2>
             <p className="text-xs font-mono text-on-surface-variant">/root/admin/returns</p>
           </div>
-          <div className="flex gap-1 p-1 bg-surface-container rounded-xl border border-outline-variant/10">
+          <div className="flex items-center gap-2">
+            <InfoTooltip text={RETURN_TOOLTIPS.statusFilter} />
+            <div className="flex gap-1 p-1 bg-surface-container rounded-xl border border-outline-variant/10">
             {['ALL', ...STATUSES].map(s => (
               <button key={s} onClick={() => setFilter(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${filter === s ? 'bg-primary-container text-on-primary-container' : 'text-on-surface-variant hover:text-on-surface'}`}>
                 {s === 'ALL' ? 'Todos' : STATUS_LABELS[s]}
               </button>
             ))}
+            </div>
           </div>
         </header>
 
@@ -130,7 +135,7 @@ const AdminReturns = () => {
           <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-5">
             <h3 className="font-headline font-bold text-lg">Resolver Solicitud</h3>
             <div>
-              <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Resolución</label>
+              <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Resolución<InfoTooltip text={RETURN_TOOLTIPS.resolutionSelect} /></label>
               <select value={modal.status} onChange={e => setModal(m => ({ ...m, status: e.target.value }))}
                 className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none">
                 <option value="approved">Aprobada</option>
@@ -139,7 +144,7 @@ const AdminReturns = () => {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nota para el cliente</label>
+              <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nota interna<InfoTooltip text={RETURN_TOOLTIPS.adminNotes} /></label>
               <textarea value={modal.note} onChange={e => setModal(m => ({ ...m, note: e.target.value }))} rows={3}
                 placeholder="Motivo de la resolución..."
                 className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none resize-none" />

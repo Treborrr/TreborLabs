@@ -3,6 +3,8 @@ import useSiteConfig from '../hooks/useSiteConfig';
 import { useAuth } from '../context/AuthContext';
 import LinkPicker from '../components/LinkPicker';
 import HeroBgPicker from '../components/HeroBgPicker';
+import InfoTooltip from '../components/InfoTooltip';
+import { SITE_CONFIG_TOOLTIPS } from '../constants/adminTooltips';
 
 const AdminSiteConfig = () => {
   const { authFetch, API } = useAuth();
@@ -163,44 +165,44 @@ const AdminSiteConfig = () => {
             <h2 className="text-lg font-bold mb-6 font-headline text-primary border-b border-outline-variant/20 pb-2">Sección: Hero</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Badge</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Badge<InfoTooltip text={SITE_CONFIG_TOOLTIPS.heroBadge} /></label>
                 <input type="text" value={formData.hero.badge || ''} onChange={(e) => handleChange('hero', 'badge', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
               </div>
               <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Titular Parte 1</label>
+                  <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Titular Parte 1<InfoTooltip text={SITE_CONFIG_TOOLTIPS.heroHeadline1} /></label>
                   <input type="text" value={formData.hero.headlinePart1 || ''} onChange={(e) => handleChange('hero', 'headlinePart1', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Titular Parte 2 (Italic & Primary)</label>
+                  <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Titular Parte 2 (Italic & Primary)<InfoTooltip text={SITE_CONFIG_TOOLTIPS.heroHeadline2} /></label>
                   <input type="text" value={formData.hero.headlinePart2 || ''} onChange={(e) => handleChange('hero', 'headlinePart2', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
                 </div>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Subtítulo</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Subtítulo<InfoTooltip text={SITE_CONFIG_TOOLTIPS.heroSubtitle} /></label>
                 <textarea value={formData.hero.subtitle || ''} onChange={(e) => handleChange('hero', 'subtitle', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" rows={2} />
               </div>
 
               <div>
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA Principal (Texto)</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA Principal (Texto)<InfoTooltip text={SITE_CONFIG_TOOLTIPS.ctaPrimaryText} /></label>
                 <input type="text" value={formData.hero.ctaPrimary || ''} onChange={(e) => handleChange('hero', 'ctaPrimary', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA Principal (Link)</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA Principal (Link)<InfoTooltip text={SITE_CONFIG_TOOLTIPS.ctaPrimaryLink} /></label>
                 <LinkPicker value={formData.hero.ctaPrimaryLink || ''} onChange={(v) => handleChange('hero', 'ctaPrimaryLink', v)} />
               </div>
 
               <div>
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA Secundario (Texto)</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA Secundario (Texto)<InfoTooltip text={SITE_CONFIG_TOOLTIPS.ctaSecondaryText} /></label>
                 <input type="text" value={formData.hero.ctaSecondary || ''} onChange={(e) => handleChange('hero', 'ctaSecondary', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA Secundario (Link)</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA Secundario (Link)<InfoTooltip text={SITE_CONFIG_TOOLTIPS.ctaSecondaryLink} /></label>
                 <LinkPicker value={formData.hero.ctaSecondaryLink || ''} onChange={(v) => handleChange('hero', 'ctaSecondaryLink', v)} />
               </div>
               
               <div className="md:col-span-2">
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-3">Fondo del Hero</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-3">Fondo del Hero<InfoTooltip text={SITE_CONFIG_TOOLTIPS.heroBg} /></label>
                 <HeroBgPicker
                   value={formData.hero.background || { type: 'preset', preset: 'amethyst-bloom', url: null }}
                   onChange={(bgConfig) => handleChange('hero', 'background', bgConfig)}
@@ -210,7 +212,7 @@ const AdminSiteConfig = () => {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Imagen Principal (Cuadro Rotado)</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Imagen Principal (Cuadro Rotado)<InfoTooltip text={SITE_CONFIG_TOOLTIPS.heroImage} /></label>
                 <div className="flex items-center gap-4 bg-surface-container px-4 py-3 border border-outline-variant/30 rounded-lg">
                   {formData.hero.image && (
                     <img src={formData.hero.image.startsWith('http') ? formData.hero.image : `${API || ''}${formData.hero.image}`} alt="Preview" className="w-16 h-16 object-cover rounded-md shadow-md border border-outline/20" />
@@ -227,17 +229,17 @@ const AdminSiteConfig = () => {
                   <div className="bg-surface-container border border-outline-variant/30 p-5 rounded-lg space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[10px] font-mono tracking-widest text-on-surface-variant uppercase mb-1">Atributo 1</label>
+                        <label className="block text-[10px] font-mono tracking-widest text-on-surface-variant uppercase mb-1">Atributo 1<InfoTooltip text={SITE_CONFIG_TOOLTIPS.specSwitches} /></label>
                         <input type="text" value={formData.hero?.specCard?.switches || ''} onChange={(e) => handleHeroSpecChange('switches', e.target.value)} className="w-full bg-surface-container-high border-none p-2.5 rounded text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" placeholder="Ej: Gateron Milky Yellow Pro" />
                       </div>
                       <div>
-                        <label className="block text-[10px] font-mono tracking-widest text-on-surface-variant uppercase mb-1">Atributo 2</label>
+                        <label className="block text-[10px] font-mono tracking-widest text-on-surface-variant uppercase mb-1">Atributo 2<InfoTooltip text={SITE_CONFIG_TOOLTIPS.specKeycaps} /></label>
                         <input type="text" value={formData.hero?.specCard?.keycaps || ''} onChange={(e) => handleHeroSpecChange('keycaps', e.target.value)} className="w-full bg-surface-container-high border-none p-2.5 rounded text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" placeholder="Ej: PBT Double Shot" />
                       </div>
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <label className="text-[10px] font-mono tracking-widest text-on-surface-variant uppercase">Posición Vertical</label>
+                        <label className="text-[10px] font-mono tracking-widest text-on-surface-variant uppercase">Posición Vertical<InfoTooltip text={SITE_CONFIG_TOOLTIPS.specPosition} /></label>
                         <span className="text-[10px] font-mono text-primary font-bold">{formData.hero?.specCard?.offsetY ?? 75}%</span>
                       </div>
                       <input
@@ -251,7 +253,7 @@ const AdminSiteConfig = () => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-mono tracking-widest text-on-surface-variant uppercase mb-2">Tamaño</label>
+                      <label className="block text-[10px] font-mono tracking-widest text-on-surface-variant uppercase mb-2">Tamaño<InfoTooltip text={SITE_CONFIG_TOOLTIPS.specSize} /></label>
                       <div className="flex gap-2">
                         {[{ id: 'sm', label: 'S — Compacto' }, { id: 'md', label: 'M — Normal' }, { id: 'lg', label: 'L — Grande' }].map(({ id, label }) => (
                           <button
@@ -313,31 +315,31 @@ const AdminSiteConfig = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Título</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Título<InfoTooltip text={SITE_CONFIG_TOOLTIPS.aboutTitle} /></label>
                 <input type="text" value={formData.about.title || ''} onChange={(e) => handleChange('about', 'title', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
               </div>
               
               <div className="md:col-span-2">
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Párrafo 1</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Párrafo 1<InfoTooltip text={SITE_CONFIG_TOOLTIPS.aboutP1} /></label>
                 <textarea value={formData.about.paragraphs?.[0] || ''} onChange={(e) => handleAboutParagraphChange(0, e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" rows={3} />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Párrafo 2</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Párrafo 2<InfoTooltip text={SITE_CONFIG_TOOLTIPS.aboutP2} /></label>
                 <textarea value={formData.about.paragraphs?.[1] || ''} onChange={(e) => handleAboutParagraphChange(1, e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" rows={3} />
               </div>
 
               <div>
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA (Texto)</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA (Texto)<InfoTooltip text={SITE_CONFIG_TOOLTIPS.aboutCtaText} /></label>
                 <input type="text" value={formData.about.cta || ''} onChange={(e) => handleChange('about', 'cta', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" />
               </div>
               <div>
-                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA (Link)</label>
+                <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">CTA (Link)<InfoTooltip text={SITE_CONFIG_TOOLTIPS.aboutCtaLink} /></label>
                 <LinkPicker value={formData.about.ctaLink || ''} onChange={(v) => handleChange('about', 'ctaLink', v)} />
               </div>
 
               <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-outline-variant/10 mt-2">
                 <div className="bg-surface-container border border-outline-variant/30 p-5 rounded-lg">
-                  <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-3"><span className="material-symbols-outlined text-[14px] align-middle mr-1">image</span> Decorativa 1</label>
+                  <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-3"><span className="material-symbols-outlined text-[14px] align-middle mr-1">image</span> Decorativa 1<InfoTooltip text={SITE_CONFIG_TOOLTIPS.aboutImage1} /></label>
                   {formData.about.images?.[0] && (
                     <img src={formData.about.images[0].startsWith('http') ? formData.about.images[0] : `${API || ''}${formData.about.images[0]}`} className="w-full h-32 object-cover rounded-md mb-3 border border-outline/20 shadow-sm" />
                   )}
@@ -350,7 +352,7 @@ const AdminSiteConfig = () => {
                 </div>
                 
                 <div className="bg-surface-container border border-outline-variant/30 p-5 rounded-lg">
-                  <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-3"><span className="material-symbols-outlined text-[14px] align-middle mr-1">image</span> Decorativa 2</label>
+                  <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-3"><span className="material-symbols-outlined text-[14px] align-middle mr-1">image</span> Decorativa 2<InfoTooltip text={SITE_CONFIG_TOOLTIPS.aboutImage2} /></label>
                   {formData.about.images?.[1] && (
                     <img src={formData.about.images[1].startsWith('http') ? formData.about.images[1] : `${API || ''}${formData.about.images[1]}`} className="w-full h-32 object-cover rounded-md mb-3 border border-outline/20 shadow-sm" />
                   )}
@@ -368,7 +370,7 @@ const AdminSiteConfig = () => {
           <section className="bg-surface p-8 rounded-xl shadow-2xl animate-fade-in">
             <h2 className="text-lg font-bold mb-6 font-headline text-primary border-b border-outline-variant/20 pb-2">Sección: Footer</h2>
             <div>
-              <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Descripción / Tagline</label>
+              <label className="block text-xs font-mono tracking-widest text-on-surface-variant uppercase mb-2">Descripción / Tagline<InfoTooltip text={SITE_CONFIG_TOOLTIPS.footerTagline} /></label>
               <textarea value={formData.footer?.tagline || ''} onChange={(e) => handleChange('footer', 'tagline', e.target.value)} className="w-full bg-surface-container-high border-none p-3 rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none" rows={2} />
             </div>
           </section>

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import InfoTooltip from '../components/InfoTooltip';
+import { SETTINGS_TOOLTIPS } from '../constants/adminTooltips';
 
 const tabs = ['General', 'Payments', 'Shipping', 'Security', 'Integrations'];
 
@@ -50,13 +52,13 @@ const AdminSettings = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[
-                    { label: 'Store Name', placeholder: 'Trebor Labs', type: 'text' },
-                    { label: 'Support Email', placeholder: 'support@treborlabs.io', type: 'email' },
-                    { label: 'Store URL', placeholder: 'https://treborlabs.io', type: 'url' },
-                    { label: 'Default Currency', placeholder: 'USD', type: 'text' },
-                  ].map(({ label, placeholder, type }) => (
+                    { label: 'Store Name', placeholder: 'Trebor Labs', type: 'text', tip: SETTINGS_TOOLTIPS.storeName },
+                    { label: 'Support Email', placeholder: 'support@treborlabs.io', type: 'email', tip: SETTINGS_TOOLTIPS.supportEmail },
+                    { label: 'Store URL', placeholder: 'https://treborlabs.io', type: 'url', tip: SETTINGS_TOOLTIPS.storeUrl },
+                    { label: 'Default Currency', placeholder: 'USD', type: 'text', tip: SETTINGS_TOOLTIPS.currency },
+                  ].map(({ label, placeholder, type, tip }) => (
                     <div key={label}>
-                      <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">{label}</label>
+                      <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">{label}{tip && <InfoTooltip text={tip} />}</label>
                       <input
                         type={type}
                         defaultValue={placeholder}
@@ -87,7 +89,7 @@ const AdminSettings = () => {
                           <span className="material-symbols-outlined text-primary">account_balance_wallet</span>
                         </div>
                         <div>
-                          <h4 className="font-bold text-sm">Mercado Pago</h4>
+                          <h4 className="font-bold text-sm">Mercado Pago<InfoTooltip text={SETTINGS_TOOLTIPS.mercadoPago} /></h4>
                           <p className="text-xs text-on-surface-variant">Yape, Plin, Transferencia bancaria</p>
                         </div>
                       </div>
@@ -101,11 +103,11 @@ const AdminSettings = () => {
                     {mpEnabled && (
                       <div className="space-y-3 pt-4 border-t border-outline-variant/20">
                         <div>
-                          <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Public Key</label>
+                          <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Public Key<InfoTooltip text={SETTINGS_TOOLTIPS.mpPublicKey} /></label>
                           <input className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm font-mono text-on-surface-variant focus:ring-1 focus:ring-primary/40 focus:outline-none" placeholder="APP_USR-..." type="password" />
                         </div>
                         <div>
-                          <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Access Token</label>
+                          <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Access Token<InfoTooltip text={SETTINGS_TOOLTIPS.mpAccessToken} /></label>
                           <input className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm font-mono text-on-surface-variant focus:ring-1 focus:ring-primary/40 focus:outline-none" placeholder="APP_USR-..." type="password" />
                         </div>
                       </div>

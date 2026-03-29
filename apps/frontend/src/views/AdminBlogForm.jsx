@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
 import { useAuth } from '../context/AuthContext';
+import InfoTooltip from '../components/InfoTooltip';
+import { BLOG_TOOLTIPS } from '../constants/adminTooltips';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 const LS_KEY = 'trebor_blog_draft';
@@ -166,7 +168,7 @@ const AdminBlogForm = () => {
               {/* Title + Slug */}
               <section className="bg-surface p-8 rounded-xl shadow-2xl space-y-4">
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Título *</label>
+                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Título *<InfoTooltip text={BLOG_TOOLTIPS.title} /></label>
                   <input
                     type="text" value={form.title} onChange={handleTitleChange} required
                     className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none text-lg font-headline"
@@ -174,7 +176,7 @@ const AdminBlogForm = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Slug</label>
+                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Slug<InfoTooltip text={BLOG_TOOLTIPS.slug} /></label>
                   <input
                     type="text" value={form.slug} onChange={e => set('slug', e.target.value)}
                     className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none font-mono"
@@ -186,7 +188,7 @@ const AdminBlogForm = () => {
               {/* Markdown editor + preview */}
               <section className="bg-surface p-8 rounded-xl shadow-2xl space-y-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-headline font-bold text-lg">Contenido *</h3>
+                  <h3 className="font-headline font-bold text-lg">Contenido *<InfoTooltip text={BLOG_TOOLTIPS.content} /></h3>
                   <button
                     type="button"
                     onClick={() => setPreview(v => !v)}
@@ -215,7 +217,7 @@ const AdminBlogForm = () => {
 
               {/* Excerpt */}
               <section className="bg-surface p-8 rounded-xl shadow-2xl">
-                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Extracto (resumen)</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Extracto (resumen)<InfoTooltip text={BLOG_TOOLTIPS.excerpt} /></label>
                 <textarea
                   value={form.excerpt} onChange={e => set('excerpt', e.target.value)} rows={3}
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none resize-none"
@@ -230,7 +232,7 @@ const AdminBlogForm = () => {
               <section className="bg-surface p-6 rounded-xl shadow-2xl space-y-4">
                 <h3 className="font-headline font-bold text-base">Publicación</h3>
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Estado</label>
+                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Estado<InfoTooltip text={BLOG_TOOLTIPS.status} /></label>
                   <select
                     value={form.status} onChange={e => set('status', e.target.value)}
                     className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none"
@@ -240,7 +242,7 @@ const AdminBlogForm = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Categoría</label>
+                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Categoría<InfoTooltip text={BLOG_TOOLTIPS.category} /></label>
                   <input
                     type="text" value={form.category} onChange={e => set('category', e.target.value)}
                     className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none"
@@ -251,7 +253,7 @@ const AdminBlogForm = () => {
 
               {/* Cover image */}
               <section className="bg-surface p-6 rounded-xl shadow-2xl space-y-4">
-                <h3 className="font-headline font-bold text-base">Imagen de portada</h3>
+                <h3 className="font-headline font-bold text-base">Imagen de portada<InfoTooltip text={BLOG_TOOLTIPS.coverImage} /></h3>
                 {form.coverImage && (
                   <div className="relative rounded-lg overflow-hidden aspect-video bg-surface-container-high">
                     <img src={form.coverImage} alt="Cover" className="w-full h-full object-cover" />

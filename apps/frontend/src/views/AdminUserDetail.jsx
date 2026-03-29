@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import InfoTooltip from '../components/InfoTooltip';
+import { USER_DETAIL_TOOLTIPS } from '../constants/adminTooltips';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -93,7 +95,7 @@ const AdminUserDetail = () => {
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-mono text-xs uppercase tracking-widest transition-all ${userData.suspended ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20' : 'bg-error/10 text-error hover:bg-error/20'}`}
           >
             <span className="material-symbols-outlined text-sm">{userData.suspended ? 'person_add' : 'person_off'}</span>
-            {userData.suspended ? 'Reactivar' : 'Suspender'}
+            {userData.suspended ? 'Reactivar' : 'Suspender'}<InfoTooltip text={USER_DETAIL_TOOLTIPS.suspend} />
           </button>
         </header>
 
@@ -104,17 +106,17 @@ const AdminUserDetail = () => {
             <form onSubmit={handleSave} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nombre</label>
+                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nombre<InfoTooltip text={USER_DETAIL_TOOLTIPS.name} /></label>
                   <input type="text" value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                     className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Email</label>
+                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Email<InfoTooltip text={USER_DETAIL_TOOLTIPS.email} /></label>
                   <input type="email" value={form.email || ''} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                     className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Rol</label>
+                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Rol<InfoTooltip text={USER_DETAIL_TOOLTIPS.role} /></label>
                   <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
                     className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none">
                     <option value="USER">USER</option>

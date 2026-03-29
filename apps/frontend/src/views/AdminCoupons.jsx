@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import InfoTooltip from '../components/InfoTooltip';
+import { COUPON_TOOLTIPS } from '../constants/adminTooltips';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -100,14 +102,14 @@ const AdminCoupons = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Código *</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Código *<InfoTooltip text={COUPON_TOOLTIPS.code} /></label>
                     <input type="text" required value={form.code} onChange={e => set('code', e.target.value.toUpperCase())}
                       placeholder="VERANO20"
                       className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm font-mono focus:ring-1 focus:ring-primary/40 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Tipo *</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Tipo *<InfoTooltip text={COUPON_TOOLTIPS.type} /></label>
                     <select value={form.type} onChange={e => set('type', e.target.value)}
                       className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none">
                       <option value="percent">Porcentaje (%)</option>
@@ -116,7 +118,7 @@ const AdminCoupons = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">
-                      Valor * {form.type === 'percent' ? '(%)' : '(USD)'}
+                      Valor * {form.type === 'percent' ? '(%)' : '(USD)'}<InfoTooltip text={COUPON_TOOLTIPS.value} />
                     </label>
                     <input type="number" required min="0" step={form.type === 'percent' ? '1' : '0.01'}
                       max={form.type === 'percent' ? '100' : undefined}
@@ -126,21 +128,21 @@ const AdminCoupons = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Mínimo de compra (USD)</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Mínimo de compra (USD)<InfoTooltip text={COUPON_TOOLTIPS.minOrderTotal} /></label>
                     <input type="number" min="0" step="0.01" value={form.minOrderTotal}
                       onChange={e => set('minOrderTotal', e.target.value)} placeholder="50.00"
                       className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Usos máximos</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Usos máximos<InfoTooltip text={COUPON_TOOLTIPS.maxUses} /></label>
                     <input type="number" min="1" value={form.maxUses} onChange={e => set('maxUses', e.target.value)}
                       placeholder="100"
                       className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Vence el</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Vence el<InfoTooltip text={COUPON_TOOLTIPS.expiresAt} /></label>
                     <input type="date" value={form.expiresAt ? form.expiresAt.slice(0, 10) : ''}
                       onChange={e => set('expiresAt', e.target.value)}
                       className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none"
@@ -150,7 +152,7 @@ const AdminCoupons = () => {
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input type="checkbox" checked={!!form.enabled} onChange={e => set('enabled', e.target.checked)}
                     className="w-4 h-4 accent-primary rounded" />
-                  <span className="text-sm text-on-surface-variant">Cupón habilitado</span>
+                  <span className="text-sm text-on-surface-variant">Cupón habilitado<InfoTooltip text={COUPON_TOOLTIPS.enabled} /></span>
                 </label>
                 <div className="flex gap-3 pt-2">
                   <button type="submit" disabled={saving}

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import InfoTooltip from '../components/InfoTooltip';
+import { ORDER_TOOLTIPS } from '../constants/adminTooltips';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -82,7 +84,7 @@ const ManualOrderModal = ({ onCreated, authFetch }) => {
             {error && <div className="bg-error/10 border border-error/30 rounded-lg px-4 py-3 text-sm text-error">{error}</div>}
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Email del cliente</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Email del cliente<InfoTooltip text={ORDER_TOOLTIPS.manualEmail} /></label>
                 <input type="email" value={form.userEmail} onChange={e => setForm(f => ({ ...f, userEmail: e.target.value }))}
                   placeholder="cliente@email.com"
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none" />
@@ -91,8 +93,16 @@ const ManualOrderModal = ({ onCreated, authFetch }) => {
               <div>
                 <p className="text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-3">Dirección de Envío</p>
                 <div className="grid grid-cols-2 gap-3">
-                  {[['fullName','Nombre completo'],['line1','Dirección'],['district','Distrito'],['city','Ciudad'],['region','Región'],['phone','Teléfono']].map(([k, label]) => (
+                  {[
+                    ['fullName','Nombre completo', ORDER_TOOLTIPS.manualName],
+                    ['line1','Dirección', ORDER_TOOLTIPS.manualAddress],
+                    ['district','Distrito', ORDER_TOOLTIPS.manualDistrict],
+                    ['city','Ciudad', ORDER_TOOLTIPS.manualCity],
+                    ['region','Región', ORDER_TOOLTIPS.manualRegion],
+                    ['phone','Teléfono', ORDER_TOOLTIPS.manualPhone],
+                  ].map(([k, label, tip]) => (
                     <div key={k}>
+                      <label className="block text-[10px] font-mono uppercase tracking-widest text-on-surface-variant mb-1">{label}{tip && <InfoTooltip text={tip} />}</label>
                       <input placeholder={label} value={form.address[k] || ''} onChange={e => setForm(f => ({ ...f, address: { ...f.address, [k]: e.target.value } }))}
                         className="w-full bg-surface-container-highest border-none rounded-md px-3 py-2.5 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none" />
                     </div>
@@ -102,7 +112,7 @@ const ManualOrderModal = ({ onCreated, authFetch }) => {
 
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-mono uppercase tracking-widest text-on-surface-variant">Productos</p>
+                  <p className="text-xs font-mono uppercase tracking-widest text-on-surface-variant">Productos<InfoTooltip text={ORDER_TOOLTIPS.manualProductName} /></p>
                   <button type="button" onClick={addItem} className="text-xs text-primary font-mono hover:underline flex items-center gap-1">
                     <span className="material-symbols-outlined text-xs">add</span> Agregar
                   </button>
@@ -122,7 +132,7 @@ const ManualOrderModal = ({ onCreated, authFetch }) => {
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Notas</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Notas<InfoTooltip text={ORDER_TOOLTIPS.manualNotes} /></label>
                 <textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={2}
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm focus:ring-1 focus:ring-primary/40 focus:outline-none resize-none" />
               </div>
@@ -284,14 +294,17 @@ const AdminOrders = () => {
         {/* Table section */}
         <section className="bg-surface p-8 rounded-xl shadow-2xl">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-            <div className="relative flex items-center bg-surface-container-high rounded-lg overflow-hidden focus-within:ring-1 ring-primary/40 transition-all">
-              <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-sm">search</span>
-              <input
-                className="bg-transparent border-none py-2.5 pl-10 pr-4 text-sm text-on-surface focus:ring-0 placeholder:text-on-surface-variant/50 w-64 focus:outline-none"
-                placeholder="Buscar pedido o cliente..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
+            <div className="relative flex items-center gap-1">
+              <div className="relative flex items-center bg-surface-container-high rounded-lg overflow-hidden focus-within:ring-1 ring-primary/40 transition-all">
+                <span className="material-symbols-outlined absolute left-3 text-on-surface-variant text-sm">search</span>
+                <input
+                  className="bg-transparent border-none py-2.5 pl-10 pr-4 text-sm text-on-surface focus:ring-0 placeholder:text-on-surface-variant/50 w-64 focus:outline-none"
+                  placeholder="Buscar pedido o cliente..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
+              <InfoTooltip text={ORDER_TOOLTIPS.search} />
             </div>
             <div className="flex gap-1 p-1 bg-surface-container rounded-xl border border-outline-variant/10 overflow-x-auto no-scrollbar">
               {TABS.map(tab => (
@@ -315,9 +328,10 @@ const AdminOrders = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-outline-variant/20">
-                    {['Pedido', 'Cliente', 'Producto', 'Monto', 'Fecha', 'Estado', 'Acciones'].map(h => (
+                    {['Pedido', 'Cliente', 'Producto', 'Monto', 'Fecha', 'Estado'].map(h => (
                       <th key={h} className="text-left pb-4 text-[10px] font-mono tracking-widest text-on-surface-variant uppercase pr-4">{h}</th>
                     ))}
+                    <th className="text-left pb-4 text-[10px] font-mono tracking-widest text-on-surface-variant uppercase pr-4">Acciones<InfoTooltip text={ORDER_TOOLTIPS.statusSelect} /></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/10">

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { imgUrl } from '../utils/imgUrl';
+import InfoTooltip from '../components/InfoTooltip';
+import { PRODUCT_TOOLTIPS } from '../constants/adminTooltips';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -204,7 +206,7 @@ const AdminProductForm = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nombre *</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nombre *<InfoTooltip text={PRODUCT_TOOLTIPS.name} /></label>
                 <input
                   type="text" value={form.name} onChange={handleNameChange} required
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none"
@@ -212,7 +214,7 @@ const AdminProductForm = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Slug</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Slug<InfoTooltip text={PRODUCT_TOOLTIPS.slug} /></label>
                 <input
                   type="text" value={form.slug} onChange={e => set('slug', e.target.value)}
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none font-mono"
@@ -220,7 +222,7 @@ const AdminProductForm = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Categoría *</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Categoría *<InfoTooltip text={PRODUCT_TOOLTIPS.category} /></label>
                 <select
                   value={form.category} onChange={e => set('category', e.target.value)} required
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none"
@@ -232,7 +234,7 @@ const AdminProductForm = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Precio (USD) *</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Precio (USD) *<InfoTooltip text={PRODUCT_TOOLTIPS.price} /></label>
                 <input
                   type="number" value={form.price} onChange={e => set('price', e.target.value)} required min="0" step="0.01"
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none"
@@ -240,7 +242,7 @@ const AdminProductForm = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Stock</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Stock<InfoTooltip text={PRODUCT_TOOLTIPS.stock} /></label>
                 <input
                   type="number" value={form.stock} onChange={e => set('stock', e.target.value)} min="0"
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none"
@@ -248,7 +250,7 @@ const AdminProductForm = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Estado</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Estado<InfoTooltip text={PRODUCT_TOOLTIPS.status} /></label>
                 <select
                   value={form.status} onChange={e => set('status', e.target.value)}
                   className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none"
@@ -268,11 +270,11 @@ const AdminProductForm = () => {
               >
                 <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${form.featured ? 'left-5' : 'left-1'}`} />
               </div>
-              <span className="text-sm text-on-surface">Producto destacado</span>
+              <span className="text-sm text-on-surface">Producto destacado<InfoTooltip text={PRODUCT_TOOLTIPS.featured} /></span>
             </label>
 
             <div>
-              <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Descripción</label>
+              <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Descripción<InfoTooltip text={PRODUCT_TOOLTIPS.description} /></label>
               <textarea
                 value={form.description} onChange={e => set('description', e.target.value)} rows={3}
                 className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none resize-none"
@@ -283,7 +285,7 @@ const AdminProductForm = () => {
 
           {/* Imágenes */}
           <section className="bg-surface p-8 rounded-xl shadow-2xl space-y-4">
-            <h3 className="font-headline font-bold text-lg">Imágenes</h3>
+            <h3 className="font-headline font-bold text-lg">Imágenes<InfoTooltip text={PRODUCT_TOOLTIPS.images} /></h3>
             <div className="flex flex-wrap gap-4">
               {form.images.map((url, i) => (
                 <div key={i} className="relative w-24 h-24 rounded-lg overflow-hidden bg-surface-container-high border border-outline-variant/20 group">
@@ -324,7 +326,7 @@ const AdminProductForm = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {KEYBOARD_SPEC_FIELDS.map(({ key, label, placeholder }) => (
                   <div key={key}>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">{label}</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">{label}{PRODUCT_TOOLTIPS[key] && <InfoTooltip text={PRODUCT_TOOLTIPS[key]} />}</label>
                     <input
                       type="text" value={form.specs[key] || ''} onChange={e => setSpec(key, e.target.value)}
                       placeholder={placeholder}
@@ -338,7 +340,7 @@ const AdminProductForm = () => {
             {form.category === 'raspi' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Modelo</label>
+                  <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Modelo<InfoTooltip text={PRODUCT_TOOLTIPS.piModel} /></label>
                   <select
                     value={form.specs.model || ''} onChange={e => setSpec('model', e.target.value)}
                     className="w-full bg-surface-container-highest border-none rounded-md px-4 py-3 text-sm text-on-surface focus:ring-1 focus:ring-primary/40 focus:outline-none"
@@ -349,7 +351,7 @@ const AdminProductForm = () => {
                 </div>
                 {RASPI_SPEC_FIELDS.map(({ key, label, placeholder }) => (
                   <div key={key}>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">{label}</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">{label}{PRODUCT_TOOLTIPS[key] && <InfoTooltip text={PRODUCT_TOOLTIPS[key]} />}</label>
                     <input
                       type="text" value={form.specs[key] || ''} onChange={e => setSpec(key, e.target.value)}
                       placeholder={placeholder}
@@ -365,7 +367,7 @@ const AdminProductForm = () => {
           <section className="bg-surface p-8 rounded-xl shadow-2xl space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="font-headline font-bold text-lg">Afiche del Producto</h3>
+                <h3 className="font-headline font-bold text-lg">Afiche del Producto<InfoTooltip text={PRODUCT_TOOLTIPS.afiche} /></h3>
                 <p className="text-xs font-mono text-on-surface-variant mt-1">Imagen promocional vertical — recomendado 768×1276 px</p>
               </div>
               {form.afiche && (
@@ -442,7 +444,7 @@ const AdminProductForm = () => {
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nombre *</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Nombre *<InfoTooltip text={PRODUCT_TOOLTIPS.variantName} /></label>
                     <input
                       type="text"
                       value={variantDraft.label}
@@ -452,7 +454,7 @@ const AdminProductForm = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Color (hex)</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Color (hex)<InfoTooltip text={PRODUCT_TOOLTIPS.variantColor} /></label>
                     <div className="flex items-center gap-3">
                       <input
                         type="color"
@@ -470,7 +472,7 @@ const AdminProductForm = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Disponible</label>
+                    <label className="block text-xs font-mono uppercase tracking-widest text-on-surface-variant mb-2">Disponible<InfoTooltip text={PRODUCT_TOOLTIPS.variantAvail} /></label>
                     <label className="flex items-center gap-3 cursor-pointer mt-3">
                       <div
                         onClick={() => setVariantDraft(d => ({ ...d, available: !d.available }))}
