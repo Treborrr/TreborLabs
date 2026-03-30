@@ -1,6 +1,15 @@
 // Rutas de autenticación OAuth (Google + GitHub) y gestión de sesión
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const isProd = process.env.NODE_ENV === 'production';
+
+const COOKIE_OPTS = {
+  httpOnly: true,
+  path: '/',
+  maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+  secure:   isProd,
+  sameSite: isProd ? 'none' : 'lax',
+};
 
 // Helper: busca o crea el usuario a partir del perfil OAuth
 async function findOrCreateUser(prisma, { provider, providerAccountId, email, name, avatar }) {
@@ -32,10 +41,11 @@ async function findOrCreateUser(prisma, { provider, providerAccountId, email, na
   });
 }
 
-// Helper: genera JWT y redirige al frontend
-function redirectWithToken(fastify, reply, user) {
+// Helper: genera JWT, lo guarda en httpOnly cookie y redirige al frontend
+function redirectWithCookie(fastify, reply, user) {
   const token = fastify.jwt.sign({ userId: user.id }, { expiresIn: '7d' });
-  reply.redirect(`${FRONTEND_URL}/auth/callback?token=${encodeURIComponent(token)}`);
+  reply.setCookie('trebor_session', token, COOKIE_OPTS);
+  reply.redirect(`${FRONTEND_URL}/auth/callback`);
 }
 
 async function authRoutes(fastify) {
@@ -59,7 +69,7 @@ async function authRoutes(fastify) {
         avatar: profile.picture,
       });
 
-      return redirectWithToken(fastify, reply, user);
+      return redirectWithCookie(fastify, reply, user);
     } catch (err) {
       fastify.log.error(err);
       reply.redirect(`${FRONTEND_URL}/login?error=google_failed`);
@@ -102,7 +112,7 @@ async function authRoutes(fastify) {
         avatar: profile.avatar_url,
       });
 
-      return redirectWithToken(fastify, reply, user);
+      return redirectWithCookie(fastify, reply, user);
     } catch (err) {
       fastify.log.error(err);
       reply.redirect(`${FRONTEND_URL}/login?error=github_failed`);
@@ -116,8 +126,7 @@ async function authRoutes(fastify) {
 
   // ─── POST /auth/logout ────────────────────────────────────────────────────
   fastify.post('/auth/logout', { preHandler: [fastify.authenticate] }, async (request, reply) => {
-    // El JWT es stateless, solo comunicamos al cliente que lo elimine.
-    // Opcionalmente se puede registrar una blacklist con Sessions.
+    reply.clearCookie('trebor_session', { path: '/' });
     return reply.send({ ok: true });
   });
 }

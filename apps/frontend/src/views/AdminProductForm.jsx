@@ -109,12 +109,10 @@ const AdminProductForm = () => {
     if (!file) return;
     setUploading(true);
     try {
-      const token = localStorage.getItem('trebor_token');
       const fd = new FormData();
       fd.append('file', file);
-      const res = await fetch(`${API}/api/admin/upload`, {
+      const res = await authFetch(`${API}/api/admin/upload`, {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: fd,
       });
       const data = await res.json();
@@ -401,12 +399,10 @@ const AdminProductForm = () => {
                     if (!file) return;
                     setUploading(true);
                     try {
-                      const token = localStorage.getItem('trebor_token');
                       const fd = new FormData();
                       fd.append('file', file);
-                      const res = await fetch(`${API}/api/admin/upload`, {
+                      const res = await authFetch(`${API}/api/admin/upload`, {
                         method: 'POST',
-                        headers: token ? { Authorization: `Bearer ${token}` } : {},
                         body: fd,
                       });
                       const data = await res.json();

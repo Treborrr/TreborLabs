@@ -1,5 +1,38 @@
 import MercadoPagoConfig, { Payment } from 'mercadopago';
 import { sendOrderStatusUpdateEmail } from '../services/email.js';
+import crypto from 'crypto';
+
+/**
+ * Valida la firma HMAC-SHA256 del webhook de MercadoPago.
+ * Referencia: https://www.mercadopago.com.pe/developers/es/docs/your-integrations/notifications/webhooks
+ */
+function validateMPSignature(headers, dataId) {
+  const secret = process.env.MP_WEBHOOK_SECRET;
+  if (!secret) return true; // Sin secreto configurado: permitir (pero advertir en logs)
+
+  const xSignature = headers['x-signature'];
+  const xRequestId = headers['x-request-id'];
+  if (!xSignature || !xRequestId) return false;
+
+  // Formato: "ts=<timestamp>,v1=<hmac_hex>"
+  const parts = Object.fromEntries(
+    xSignature.split(',').flatMap(p => {
+      const idx = p.indexOf('=');
+      return idx > 0 ? [[p.slice(0, idx).trim(), p.slice(idx + 1).trim()]] : [];
+    })
+  );
+  const { ts, v1 } = parts;
+  if (!ts || !v1) return false;
+
+  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+  const expected = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
+
+  try {
+    return crypto.timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(v1, 'hex'));
+  } catch {
+    return false;
+  }
+}
 
 function getMPPayment() {
   const token = process.env.MP_ACCESS_TOKEN;
@@ -33,6 +66,12 @@ export default async function webhookRoutes(fastify) {
         ?? request.body?.id;
 
       if (!paymentId) return;
+
+      // Validar firma HMAC antes de procesar
+      if (!validateMPSignature(request.headers, paymentId)) {
+        fastify.log.warn({ paymentId }, 'Webhook MP rechazado: firma HMAC inválida');
+        return;
+      }
 
       const mpPayment = getMPPayment();
       if (!mpPayment) {

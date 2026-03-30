@@ -1,19 +1,25 @@
-FROM node:22-alpine
+# Stage 1: Build React app
+FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
-# Copy config files (these are NOT volume-mounted)
 COPY vite.config.js tailwind.config.js postcss.config.js ./
-
-# Copy source and public (volume-mounted in dev, but needed for the image)
 COPY index.html ./
 COPY public ./public/
 COPY src ./src/
 
-EXPOSE 5173
+# VITE_API_URL must be the public backend URL (baked in at build time)
+ARG VITE_API_URL=""
+ENV VITE_API_URL=$VITE_API_URL
 
-# server.host: true is set in vite.config.js so Vite binds to 0.0.0.0
-CMD ["npm", "run", "dev"]
+RUN npm run build
+
+# Stage 2: Serve with nginx
+FROM nginx:1.27-alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

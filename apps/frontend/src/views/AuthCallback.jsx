@@ -3,11 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 // Esta página vive en /auth/callback
-// El backend redirige aquí tras el OAuth con ?token=xxx
-// También maneja ?error=xxx si algo falló
+// El backend redirige aquí tras el OAuth o la verificación de email.
+// La sesión ya viene establecida como httpOnly cookie — solo necesitamos
+// refrescar el estado del usuario.
 const AuthCallback = () => {
   const [params] = useSearchParams();
-  const { loginWithToken } = useAuth();
+  const { loginCallback } = useAuth();
   const navigate = useNavigate();
   const ran = useRef(false);
 
@@ -15,7 +16,6 @@ const AuthCallback = () => {
     if (ran.current) return;
     ran.current = true;
 
-    const token = params.get('token');
     const error = params.get('error');
 
     if (error) {
@@ -23,16 +23,12 @@ const AuthCallback = () => {
       return;
     }
 
-    if (token) {
-      loginWithToken(token).then(() => {
-        // Redirigir al perfil o a la URL previa guardada
-        const returnTo = sessionStorage.getItem('returnTo') || '/profile';
-        sessionStorage.removeItem('returnTo');
-        navigate(returnTo, { replace: true });
-      });
-    } else {
-      navigate('/', { replace: true });
-    }
+    // Cookie httpOnly ya fue establecida por el backend; refrescar estado
+    loginCallback().then(() => {
+      const returnTo = sessionStorage.getItem('returnTo') || '/profile';
+      sessionStorage.removeItem('returnTo');
+      navigate(returnTo, { replace: true });
+    });
   }, []);
 
   return (

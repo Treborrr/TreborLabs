@@ -68,8 +68,24 @@ await fastify.register(fastifyRateLimit, {
 // ─── Plugins base ───────────────────────────────────────────────────────────
 
 await fastify.register(fastifyHelmet, {
-  contentSecurityPolicy: false, // Manejado por el CDN/proxy en Railway
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      baseUri:    ["'self'"],
+      fontSrc:    ["'self'", "https:", "data:"],
+      imgSrc:     ["'self'", "data:", "https:"],
+      objectSrc:  ["'none'"],
+      scriptSrc:  ["'self'"],
+      styleSrc:   ["'self'", "'unsafe-inline'"],
+      upgradeInsecureRequests: [],
+    },
+  },
   crossOriginEmbedderPolicy: false,
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
 });
 
 await fastify.register(fastifyCors, {
@@ -86,6 +102,10 @@ if (isProd && !jwtSecret) {
 }
 await fastify.register(fastifyJwt, {
   secret: jwtSecret || 'dev_secret_change_in_production',
+  cookie: {
+    cookieName: 'trebor_session',
+    signed: false,
+  },
 });
 
 // ─── DB ─────────────────────────────────────────────────────────────────────

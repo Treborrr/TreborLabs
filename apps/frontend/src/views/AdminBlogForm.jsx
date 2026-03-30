@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 import { useAuth } from '../context/AuthContext';
 import InfoTooltip from '../components/InfoTooltip';
 import { BLOG_TOOLTIPS } from '../constants/adminTooltips';
@@ -46,10 +47,7 @@ const AdminBlogForm = () => {
     if (isEdit) {
       (async () => {
         try {
-          const token = localStorage.getItem('trebor_token');
-          const res = await fetch(`${API}/api/posts/${id}`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
+          const res = await authFetch(`${API}/api/posts/${id}`);
           const data = await res.json();
           if (data.post) {
             const p = data.post;
@@ -89,12 +87,10 @@ const AdminBlogForm = () => {
     if (!file) return;
     setUploading(true);
     try {
-      const token = localStorage.getItem('trebor_token');
       const fd = new FormData();
       fd.append('file', file);
-      const res = await fetch(`${API}/api/admin/upload`, {
+      const res = await authFetch(`${API}/api/admin/upload`, {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: fd,
       });
       const data = await res.json();
@@ -210,7 +206,7 @@ const AdminBlogForm = () => {
                 ) : (
                   <div
                     className="min-h-[480px] bg-surface-container-highest rounded-md px-6 py-4 prose prose-invert prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: marked.parse(form.content || '*Sin contenido aún...*') }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked.parse(form.content || '*Sin contenido aún...*')) }}
                   />
                 )}
               </section>

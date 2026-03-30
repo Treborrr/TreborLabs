@@ -9,6 +9,15 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const SALT_ROUNDS  = 12;
 const TOKEN_TTL_MS = 15 * 60 * 1000; // 15 minutos
 
+const isProd = process.env.NODE_ENV === 'production';
+const COOKIE_OPTS = {
+  httpOnly: true,
+  path: '/',
+  maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+  secure:   isProd,
+  sameSite: isProd ? 'none' : 'lax',
+};
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function expiresAt() {
@@ -117,8 +126,9 @@ export default async function authEmailRoutes(fastify) {
         data: { emailVerified: true },
       });
       const user = await fastify.prisma.user.findUnique({ where: { id: record.userId } });
-      const jwt  = fastify.jwt.sign({ userId: user.id }, { expiresIn: '7d' });
-      return reply.redirect(`${FRONTEND_URL}/auth/callback?token=${encodeURIComponent(jwt)}`);
+      const jwt = fastify.jwt.sign({ userId: user.id }, { expiresIn: '7d' });
+      reply.setCookie('trebor_session', jwt, COOKIE_OPTS);
+      return reply.redirect(`${FRONTEND_URL}/auth/callback`);
     } catch (err) {
       const msg = encodeURIComponent(err.message || 'invalid_link');
       return reply.redirect(`${FRONTEND_URL}/login?error=${msg}`);
@@ -153,7 +163,8 @@ export default async function authEmailRoutes(fastify) {
     await fastify.prisma.user.update({ where: { id: user.id }, data: { lastSeenAt: new Date() } });
 
     const jwt = fastify.jwt.sign({ userId: user.id }, { expiresIn: '7d' });
-    return { token: jwt, user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar, role: user.role } };
+    reply.setCookie('trebor_session', jwt, COOKIE_OPTS);
+    return reply.send({ user: { id: user.id, email: user.email, name: user.name, avatar: user.avatar, role: user.role } });
   });
 
   // POST /api/auth/forgot-password

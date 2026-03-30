@@ -10,27 +10,20 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Al montar, verificar si hay token guardado y obtener perfil
+  // Al montar, verificar sesión vía httpOnly cookie
   useEffect(() => {
-    const token = localStorage.getItem('trebor_token');
-    if (token) {
-      fetchMe(token);
-    } else {
-      setLoading(false);
-    }
+    fetchMe();
   }, []);
 
-  const fetchMe = async (token) => {
+  const fetchMe = async () => {
     try {
       const res = await fetch(`${API}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
       });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
       } else {
-        // Token inválido o expirado
-        localStorage.removeItem('trebor_token');
         setUser(null);
       }
     } catch {
@@ -40,39 +33,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Llamado desde AuthCallback después del OAuth redirect
-  const loginWithToken = (token) => {
-    localStorage.setItem('trebor_token', token);
-    return fetchMe(token);
-  };
+  // Llamado desde AuthCallback después del OAuth / email-verify redirect
+  // El backend ya estableció la cookie; solo necesitamos refrescar el estado
+  const loginCallback = () => fetchMe();
 
   const logout = async () => {
-    const token = localStorage.getItem('trebor_token');
-    if (token) {
-      await fetch(`${API}/auth/logout`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      }).catch(() => {});
-    }
-    localStorage.removeItem('trebor_token');
+    await fetch(`${API}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    }).catch(() => {});
     setUser(null);
   };
 
   // Helper para hacer fetch autenticado desde cualquier parte
+  // Usa credentials: 'include' para enviar la httpOnly cookie automáticamente
   const authFetch = (url, options = {}) => {
-    const token = localStorage.getItem('trebor_token');
     const isFormData = options.body instanceof FormData;
     const headers = {
       ...options.headers,
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       // No forzar Content-Type en FormData — el browser lo setea con el boundary
       ...(!isFormData && !options.headers?.['Content-Type'] ? { 'Content-Type': 'application/json' } : {}),
     };
-    return fetch(url, { ...options, headers });
+    return fetch(url, { ...options, headers, credentials: 'include' });
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithToken, logout, authFetch, API }}>
+    <AuthContext.Provider value={{ user, loading, loginCallback, logout, authFetch, API }}>
       {children}
     </AuthContext.Provider>
   );
